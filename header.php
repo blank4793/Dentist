@@ -34,7 +34,7 @@ if (session_status() === PHP_SESSION_NONE) {
             </a>
         </nav>
         <div class="user-section">
-            <span id="userName"><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
+            <span id="userName"><?php echo htmlspecialchars($_SESSION['user_name'] ?? ''); ?></span>
             <a href="logout.php" class="logout-btn">Logout</a>
         </div>
     </div>

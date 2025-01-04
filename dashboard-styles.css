@@ -93,14 +93,14 @@
 .main-content {
     flex: 1;
     padding: 20px;
-    background-color: var(--background-color);
+    background-color: #f8f9fa;
 }
 
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
-    margin-bottom: 30px;
+    margin: 20px 0;
 }
 
 .stat-card {
@@ -110,41 +110,118 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.data-table {
+.stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin: 10px 0;
+}
+
+/* Recent Patients Table */
+.recent-patients {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-top: 20px;
+}
+
+.recent-patients h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.recent-patients table {
     width: 100%;
     border-collapse: collapse;
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
+    margin-top: 10px;
 }
 
-.data-table th,
-.data-table td {
+.recent-patients th,
+.recent-patients td {
     padding: 12px;
     text-align: left;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid #dee2e6;
 }
 
-.data-table th {
-    background-color: var(--background-color);
+.recent-patients th {
+    background-color: #f8f9fa;
     font-weight: bold;
+    color: #495057;
 }
 
-/* Add New Patient button in main content */
-.action-buttons {
+.recent-patients tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Action Buttons */
+.btn-edit, .btn-view {
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    margin-right: 5px;
+    display: inline-block;
+    font-size: 14px;
+}
+
+.btn-edit {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.btn-view {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: #e0a800;
+}
+
+.btn-view:hover {
+    background-color: #138496;
+}
+
+/* Header Section */
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 20px;
 }
 
+.header-section h1 {
+    margin: 0;
+    color: #333;
+}
+
 .btn-primary {
-    display: inline-block;
-    padding: 12px 24px;
-    background-color: var(--primary-color);
+    background-color: #007bff;
     color: white;
-    text-decoration: none;
+    padding: 10px 20px;
     border-radius: 4px;
-    font-weight: bold;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .btn-primary:hover {
     background-color: #0056b3;
+}
+
+/* Icons */
+.icon {
+    font-size: 18px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .recent-patients {
+        overflow-x: auto;
+    }
 } 
