@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>SVG dental charting</title>
+        <link href="https://fonts.googleapis.com/css?family=Noto+Sans" rel="stylesheet">
+        <link href="css/style.css" rel="stylesheet" />
+        <script src="js/snap.svg.js"></script>
+        <script src="js/chart.js"></script>
+    </head>
+    <body>
+        <h1>Dental Charting Demo</h1>
+
+        <!-- FIXME: viewbox needs to be there when the element is created -->
+        <svg id="chart" preserveAspectRatio="xMidYMid meet" viewbox="0 0 5820 740"></svg>
+        <section class='treatment-form'>
+            <select>
+                <option value="amalgam">Amalgam</option>
+                <option value="composite">Composite</option>
+                <option value="extract">Extract</option>
+                <option value="crown">Crown</option>
+            </select>
+            <button id='btn_add_treatment'>Add treatment</button>
+        </section>
+    </body>
+</html>

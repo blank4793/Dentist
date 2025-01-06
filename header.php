@@ -16,7 +16,7 @@ if (session_status() === PHP_SESSION_NONE) {
     <?php if (isset($_SESSION['user_id'])): ?>
     <div class="sidebar">
         <div class="logo-section">
-            <img src="tooth-icon.png" alt="Dental Clinic Logo" class="logo">
+            <img src="images/logo.jpeg" alt="Dental Clinic Logo" class="dashboard-logo">
             <h2>THE DENTAL CLINIC</h2>
         </div>
         <nav class="nav-menu">

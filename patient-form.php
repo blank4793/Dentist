@@ -9,36 +9,46 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Handle form submission
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $pdo->beginTransaction();
 
-        // Split age/gender field
-        $ageGender = explode('/', $_POST['ageGender']);
-        $age = trim($ageGender[0]);
-        $gender = trim($ageGender[1] ?? '');
-        
-        // Insert patient information
+        // Sanitize and validate inputs
+        $patientName = htmlspecialchars($_POST['patientName'] ?? '');
+        $date = $_POST['date'] ?? '';
+        $age = intval($_POST['age'] ?? 0);
+        $gender = htmlspecialchars($_POST['gender'] ?? '');
+        $sector = htmlspecialchars($_POST['sector'] ?? '');
+        $streetNo = htmlspecialchars($_POST['streetNo'] ?? '');
+        $houseNo = htmlspecialchars($_POST['houseNo'] ?? '');
+        $nonIslamabadAddress = htmlspecialchars($_POST['nonIslamabadAddress'] ?? '');
+        $phone = htmlspecialchars($_POST['phone'] ?? '');
+        $email = filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL);
+        $occupation = htmlspecialchars($_POST['occupation'] ?? '');
+
+        // Insert patient
         $stmt = $pdo->prepare("
             INSERT INTO patients (
-                name, date, address, phone, age, gender, 
-                occupation, email, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                name, date, age, gender, 
+                sector, street_no, house_no, non_islamabad_address,
+                phone, email, occupation,
+                created_at
+            ) VALUES (
+                ?, ?, ?, ?, 
+                ?, ?, ?, ?,
+                ?, ?, ?,
+                NOW()
+            )
         ");
-        
+
         $stmt->execute([
-            $_POST['patientName'],
-            $_POST['date'],
-            $_POST['address'],
-            $_POST['phone'],
-            $age,
-            $gender,
-            $_POST['occupation'],
-            $_POST['email']
+            $patientName, $date, $age, $gender,
+            $sector, $streetNo, $houseNo, $nonIslamabadAddress,
+            $phone, $email, $occupation
         ]);
-        
+
         $patientId = $pdo->lastInsertId();
-        
+
         // Insert medical history
         $stmt = $pdo->prepare("
             INSERT INTO medical_history (
@@ -118,6 +128,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
 
+        // Process dental treatments
+        if (isset($_POST['dental_treatments'])) {
+            $dentalTreatments = json_decode($_POST['dental_treatments'], true);
+            
+            foreach ($dentalTreatments as $treatment) {
+                $stmt = $pdo->prepare("
+                    INSERT INTO dental_treatments (
+                        patient_id, 
+                        tooth_number, 
+                        treatment_type,
+                        notes,
+                        status,
+                        treatment_date,
+                        price
+                    ) VALUES (?, ?, ?, ?, ?, NOW(), ?)
+                ");
+                
+                $stmt->execute([
+                    $patientId,
+                    $treatment['tooth_number'],
+                    $treatment['treatment_type'],
+                    $treatment['notes'] ?? null,
+                    'planned',
+                    $treatment['price'] ?? null
+                ]);
+            }
+        }
+
         $pdo->commit();
         $success = "Patient added successfully!";
         header("Location: view_patient.php?id=$patientId");
@@ -127,6 +165,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $error = "Error: " . $e->getMessage();
     }
 }
+
+// Add this where you want to display existing treatments
+function getExistingTreatments($patientId) {
+    global $pdo;
+    
+    $stmt = $pdo->prepare("
+        SELECT * FROM dental_treatments 
+        WHERE patient_id = ? 
+        ORDER BY created_at DESC
+    ");
+    $stmt->execute([$patientId]);
+    
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// If editing an existing patient
+if (isset($patientId)) {
+    $existingTreatments = getExistingTreatments($patientId);
+    // Add this to your JavaScript section
+    echo "<script>
+        window.existingTreatments = " . json_encode($existingTreatments) . ";
+    </script>";
+}
 ?>
 
 <!DOCTYPE html>
@@ -135,6 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Dental Clinic - Patient Registration</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="dashboard-styles.css">
 </head>
@@ -157,7 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <form id="patientForm" method="POST">
                     <!-- Personal Information -->
                     <div class="personal-info">
-                        <div class="form-row">
+                        <div class="form-row name-date">
                             <div class="form-group">
                                 <label for="patientName">PATIENT NAME</label>
                                 <input type="text" id="patientName" name="patientName" required>
@@ -168,9 +230,44 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="address">ADDRESS</label>
-                            <input type="text" id="address" name="address" required>
+                        <div class="form-row age-gender">
+                            <div class="form-group">
+                                <label for="age">AGE</label>
+                                <input type="number" id="age" name="age" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="gender">GENDER</label>
+                                <select id="gender" name="gender" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Address fields (now blended with other fields) -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="sector">SECTOR</label>
+                                <input type="text" id="sector" name="sector" placeholder="e.g., F-8, G-9">
+                            </div>
+                            <div class="form-group">
+                                <label for="streetNo">STREET NO</label>
+                                <input type="text" id="streetNo" name="streetNo">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="houseNo">HOUSE NO</label>
+                                <input type="text" id="houseNo" name="houseNo">
+                            </div>
+                            <div class="form-group">
+                                <label for="nonIslamabadAddress">NON ISLAMABAD RESIDENCE</label>
+                                <input type="text" id="nonIslamabadAddress" name="nonIslamabadAddress" 
+                                       placeholder="Enter complete address if outside Islamabad">
+                            </div>
                         </div>
 
                         <div class="form-row">
@@ -179,8 +276,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <input type="tel" id="phone" name="phone" required>
                             </div>
                             <div class="form-group">
-                                <label for="ageGender">AGE/GENDER</label>
-                                <input type="text" id="ageGender" name="ageGender" required>
+                                <label for="email">EMAIL</label>
+                                <input type="email" id="email" name="email">
                             </div>
                         </div>
 
@@ -188,10 +285,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <div class="form-group">
                                 <label for="occupation">OCCUPATION</label>
                                 <input type="text" id="occupation" name="occupation">
-                            </div>
-                            <div class="form-group">
-                                <label for="email">EMAIL</label>
-                                <input type="email" id="email" name="email">
                             </div>
                         </div>
                     </div>
@@ -279,11 +372,43 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         </div>
                     </div>
 
+                    <!-- Diagnosis Section -->
+                    <div class="diagnosis-section">
+                        <h3>DIAGNOSIS</h3>
+                        <div class="form-row full-width">
+                            <div class="form-group">
+                                <textarea id="diagnosis" name="diagnosis" class="auto-expand" placeholder="Enter diagnosis"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Treatment Advised Section -->
+                    <div class="treatment-advised-section">
+                        <h3>TREATMENT ADVISED</h3>
+                        <div class="form-row full-width">
+                            <div class="form-group">
+                                <textarea id="treatmentAdvised" name="treatmentAdvised" class="auto-expand" placeholder="Enter treatment advice"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dental Chart Section -->
+                    <div class="dental-chart-section">
+                        <h3>DENTAL CHART</h3>
+                        <div class="chart-container">
+                            <?php include 'dental-chart.html'; ?>
+                            <div class="selected-teeth-info">
+                                <h3>Selected Teeth</h3>
+                                <div id="selectedTeethList"></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Treatment Section -->
                     <div class="treatment-section">
                         <h3>TREATMENT</h3>
                         <div class="form-row">
-                            <div class="form-group">
+                            <div class="form-group treatment-select-group">
                                 <label for="treatmentSelect">Select Treatment:</label>
                                 <select id="treatmentSelect" name="treatment">
                                     <option value="">Select Treatment</option>
@@ -319,9 +444,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <table class="selected-treatments-table">
                             <thead>
                                 <tr>
-                                    <th>Treatment</th>
-                                    <th>Price</th>
-                                    <th>Action</th>
+                                    <th width="30%">Treatment</th>
+                                    <th width="15%">Quantity</th>
+                                    <th width="20%">Price Per Unit</th>
+                                    <th width="20%">Total Price</th>
+                                    <th width="15%">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="selectedTreatmentsList">
@@ -385,24 +512,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                         <th>MODE</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="visitsTableBody">
                                     <tr>
                                         <td>1<sup>ST</sup> VISIT</td>
-                                        <td><input type="number" class="amount-input" name="visit_amount[]"></td>
-                                        <td><input type="number" class="balance-input" name="visit_balance[]"></td>
+                                        <td><input type="number" class="amount-paid-input" name="visit_amount[]" step="0.01" min="0"></td>
+                                        <td><input type="number" class="balance-input" name="visit_balance[]" readonly></td>
                                         <td><input type="date" class="date-input" name="visit_date[]"></td>
                                         <td><input type="text" class="treatment-input" name="visit_treatment[]"></td>
                                         <td><input type="text" class="mode-input" name="visit_mode[]"></td>
                                     </tr>
                                 </tbody>
                             </table>
-                        </div>
-                        
-                        <div class="signature-date">
-                            <label>SIGNATURE/DATE:</label>
-                            <input type="text" id="visitSignature" name="visit_signature">
+                            <button type="button" id="addVisitRow" class="add-visit-btn">Add Visit</button>
                         </div>
                     </div>
+
+                    <input type="hidden" id="selectedTeethInput" name="selected_teeth" value="">
 
                     <button type="submit" class="submit-btn">Submit Registration</button>
                 </form>

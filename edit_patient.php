@@ -506,17 +506,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                         <th>MODE</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="visitsTableBody">
                                     <?php 
                                     $visitNumbers = ['1<sup>ST</sup>', '2<sup>ND</sup>', '3<sup>RD</sup>', '4<sup>TH</sup>', '5<sup>TH</sup>'];
                                     foreach ($visits as $index => $visit): 
                                     ?>
                                     <tr>
                                         <td><?php echo $visitNumbers[$index]; ?> VISIT</td>
-                                        <td><input type="number" class="amount-input" name="visit_amount[]" 
-                                               value="<?php echo htmlspecialchars($visit['amount']); ?>"></td>
+                                        <td><input type="number" class="amount-paid-input" name="visit_amount[]" 
+                                               value="<?php echo htmlspecialchars($visit['amount']); ?>" step="0.01" min="0"></td>
                                         <td><input type="number" class="balance-input" name="visit_balance[]" 
-                                               value="<?php echo htmlspecialchars($visit['balance']); ?>"></td>
+                                               value="<?php echo htmlspecialchars($visit['balance']); ?>" readonly></td>
                                         <td><input type="date" class="date-input" name="visit_date[]" 
                                                value="<?php echo htmlspecialchars($visit['visit_date']); ?>"></td>
                                         <td><input type="text" class="treatment-input" name="visit_treatment[]" 
@@ -528,14 +528,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <!-- Add empty row for new visit -->
                                     <tr>
                                         <td><?php echo $visitNumbers[count($visits)]; ?> VISIT</td>
-                                        <td><input type="number" class="amount-input" name="visit_amount[]"></td>
-                                        <td><input type="number" class="balance-input" name="visit_balance[]"></td>
+                                        <td><input type="number" class="amount-paid-input" name="visit_amount[]" step="0.01" min="0"></td>
+                                        <td><input type="number" class="balance-input" name="visit_balance[]" readonly></td>
                                         <td><input type="date" class="date-input" name="visit_date[]"></td>
                                         <td><input type="text" class="treatment-input" name="visit_treatment[]"></td>
                                         <td><input type="text" class="mode-input" name="visit_mode[]"></td>
                                     </tr>
                                 </tbody>
                             </table>
+                            <button type="button" id="addVisitRow" class="add-visit-btn">Add Visit</button>
                         </div>
                         
                         <div class="signature-date">

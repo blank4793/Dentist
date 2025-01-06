@@ -1,148 +1,112 @@
-$(document).ready(function() {
-    // Treatment prices mapping
-    const treatmentPrices = {
-        consultation: 1000,
-        radiograph: 1500,
-        fillingD: 3000,
-        fillingI: 2500,
-        rct: 15000,
-        pfmCrownD: 12000,
-        pfmCrownI: 10000,
-        zirconia: 20000,
-        extSimple: 2000,
-        extComp: 4000,
-        acrylicDent: 25000,
-        ccPlate: 8000,
-        completeDenture: 35000,
-        flexideDenture: 40000,
-        bridgeD: 30000,
-        bridgeI: 25000,
-        implant: 50000,
-        laserTeethWhitening: 15000,
-        postAndCore: 8000,
-        peadFilling: 2500,
-        peadExt: 2000,
-        pulpotomy: 5000,
-        toothJewels: 3000,
-        scalingAndPolishing: 3500,
-        rootPlanning: 5000
-    };
+// Keep the DentalChart class implementation 
 
-    // Handle treatment selection
-    $('#treatmentSelect').change(function() {
-        const selectedValue = $(this).val();
-        if (selectedValue) {
-            const treatmentText = $(this).find('option:selected').text();
-            const price = treatmentPrices[selectedValue];
-            
-            // Add row to table
-            const newRow = `
-                <tr>
-                    <td>${treatmentText.split(' (₹')[0]}</td>
-                    <td>₹${price.toLocaleString()}</td>
-                    <td><button type="button" class="remove-btn">Remove</button></td>
-                </tr>
-            `;
-            $('#selectedTreatmentsList').append(newRow);
-            
-            // Reset select
-            $(this).val('');
-            
-            // Update totals
-            updateTotalAmount();
-        }
-    });
-
-    // Handle remove button clicks
-    $(document).on('click', '.remove-btn', function() {
-        $(this).closest('tr').remove();
-        updateTotalAmount();
-    });
-
-    // Update total amount
-    function updateTotalAmount() {
-        let total = 0;
-        $('#selectedTreatmentsList tr').each(function() {
-            const priceText = $(this).find('td:eq(1)').text();
-            const price = parseInt(priceText.replace(/[^0-9]/g, ''));
-            total += price;
-        });
-
-        $('#totalAmount').text(`₹${total.toLocaleString()}`);
-        updateNetTotal();
-    }
-
-    // Update net total after discount
-    function updateNetTotal() {
-        const totalAmount = parseInt($('#totalAmount').text().replace(/[^0-9]/g, ''));
-        const discountType = $('#discountType').val();
-        const discountValue = parseFloat($('#discountValue').val()) || 0;
+// Tooth Chart Handling
+document.addEventListener('DOMContentLoaded', function() {
+    const selectedTeeth = new Set();
+    const selectedTeethList = document.getElementById('selectedTeethList');
+    
+    // Get all tooth polygons and paths from SVG
+    const toothElements = document.querySelectorAll('#Spots polygon, #Spots path');
+    
+    // Tooth name mapping using FDI/ISO system
+    const toothNames = {
+        // Upper Right (18-11)
+        18: "Upper Right Third Molar",
+        17: "Upper Right Second Molar",
+        16: "Upper Right First Molar",
+        15: "Upper Right Second Premolar",
+        14: "Upper Right First Premolar",
+        13: "Upper Right Canine",
+        12: "Upper Right Lateral Incisor",
+        11: "Upper Right Central Incisor",
         
-        let netTotal = totalAmount;
-        if (discountType === 'percentage') {
-            netTotal = totalAmount - (totalAmount * (discountValue / 100));
-        } else {
-            netTotal = totalAmount - discountValue;
-        }
-
-        $('#netTotal').text(`₹${netTotal.toLocaleString()}`);
-    }
-
-    // Handle discount changes
-    $('#discountType, #discountValue').on('change input', updateNetTotal);
-
-    // Add new visit row
-    $('.add-visit-row').click(function() {
-        const newRow = `
-            <tr>
-                <td><input type="date" class="date-input" name="visit_date[]"></td>
-                <td><input type="text" class="treatment-input" name="visit_treatment[]"></td>
-                <td><input type="number" class="amount-input" name="visit_amount[]"></td>
-                <td><input type="text" class="mode-input" name="visit_mode[]"></td>
-                <td><input type="number" class="balance-input" name="visit_balance[]"></td>
-                <td><button type="button" class="remove-visit-row">Remove</button></td>
-            </tr>
-        `;
-        $('.visits-table tbody').append(newRow);
-    });
-
-    // Remove visit row
-    $(document).on('click', '.remove-visit-row', function() {
-        $(this).closest('tr').remove();
-    });
-
-    // Form submission
-    $('#patientForm').on('submit', function(e) {
-        // Collect selected treatments
-        const treatments = [];
-        $('#selectedTreatmentsList tr').each(function() {
-            treatments.push({
-                name: $(this).find('td:eq(0)').text(),
-                price: parseInt($(this).find('td:eq(1)').text().replace(/[^0-9]/g, ''))
-            });
+        // Upper Left (21-28)
+        21: "Upper Left Central Incisor",
+        22: "Upper Left Lateral Incisor",
+        23: "Upper Left Canine",
+        24: "Upper Left First Premolar",
+        25: "Upper Left Second Premolar",
+        26: "Upper Left First Molar",
+        27: "Upper Left Second Molar",
+        28: "Upper Left Third Molar",
+        
+        // Lower Left (38-31)
+        38: "Lower Left Third Molar",
+        37: "Lower Left Second Molar",
+        36: "Lower Left First Molar",
+        35: "Lower Left Second Premolar",
+        34: "Lower Left First Premolar",
+        33: "Lower Left Canine",
+        32: "Lower Left Lateral Incisor",
+        31: "Lower Left Central Incisor",
+        
+        // Lower Right (41-48)
+        41: "Lower Right Central Incisor",
+        42: "Lower Right Lateral Incisor",
+        43: "Lower Right Canine",
+        44: "Lower Right First Premolar",
+        45: "Lower Right Second Premolar",
+        46: "Lower Right First Molar",
+        47: "Lower Right Second Molar",
+        48: "Lower Right Third Molar"
+    };
+    
+    toothElements.forEach(tooth => {
+        tooth.addEventListener('click', function() {
+            const toothId = this.getAttribute('data-key');
+            
+            if (selectedTeeth.has(toothId)) {
+                // Deselect tooth
+                selectedTeeth.delete(toothId);
+                this.classList.remove('selected');
+                removeToothFromList(toothId);
+            } else {
+                // Select tooth
+                selectedTeeth.add(toothId);
+                this.classList.add('selected');
+                addToothToList(toothId);
+            }
+            
+            // Update hidden input with selected teeth
+            updateSelectedTeethInput();
         });
-
-        // Add treatments to form data
-        const treatmentsInput = $('<input>')
-            .attr('type', 'hidden')
-            .attr('name', 'treatments')
-            .val(JSON.stringify(treatments));
-        $(this).append(treatmentsInput);
-
-        // Add billing details
-        const billingDetails = {
-            totalAmount: parseInt($('#totalAmount').text().replace(/[^0-9]/g, '')),
-            discountType: $('#discountType').val(),
-            discountValue: parseFloat($('#discountValue').val()) || 0,
-            netTotal: parseInt($('#netTotal').text().replace(/[^0-9]/g, ''))
-        };
-
-        const billingInput = $('<input>')
-            .attr('type', 'hidden')
-            .attr('name', 'billing')
-            .val(JSON.stringify(billingDetails));
-        $(this).append(billingInput);
-
-        return true;
     });
+    
+    function addToothToList(toothId) {
+        const toothItem = document.createElement('div');
+        toothItem.className = 'selected-tooth-item';
+        toothItem.setAttribute('data-tooth-id', toothId);
+        
+        toothItem.innerHTML = `
+            ${toothNames[toothId]} (Tooth ${toothId})
+            <span class="remove-tooth" onclick="removeToothSelection('${toothId}')">&times;</span>
+        `;
+        
+        selectedTeethList.appendChild(toothItem);
+    }
+    
+    function removeToothFromList(toothId) {
+        const toothItem = selectedTeethList.querySelector(`[data-tooth-id="${toothId}"]`);
+        if (toothItem) {
+            toothItem.remove();
+        }
+    }
+    
+    function updateSelectedTeethInput() {
+        const selectedTeethInput = document.getElementById('selectedTeethInput');
+        if (selectedTeethInput) {
+            selectedTeethInput.value = Array.from(selectedTeeth).join(',');
+        }
+    }
+    
+    // Global function to remove tooth selection
+    window.removeToothSelection = function(toothId) {
+        const tooth = document.querySelector(`#Spots [data-key="${toothId}"]`);
+        if (tooth) {
+            tooth.classList.remove('selected');
+        }
+        selectedTeeth.delete(toothId);
+        removeToothFromList(toothId);
+        updateSelectedTeethInput();
+    };
 }); 

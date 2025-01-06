@@ -82,14 +82,47 @@ $visits = $stmt->fetchAll();
                 <section class="detail-section">
                     <h2>Medical History</h2>
                     <div class="medical-history-grid">
-                        <?php foreach ($medicalHistory as $key => $value): ?>
-                            <?php if ($key !== 'id' && $key !== 'patient_id'): ?>
+                        <?php 
+                        $medical_conditions = [
+                            'heart_problem' => 'Heart Problem',
+                            'blood_pressure' => 'Blood Pressure',
+                            'bleeding_disorder' => 'Bleeding Disorder',
+                            'blood_thinners' => 'Blood Thinners',
+                            'hepatitis' => 'Hepatitis B or C',
+                            'diabetes' => 'Diabetes/Sugar',
+                            'fainting_spells' => 'Fainting Spells',
+                            'allergy_anesthesia' => 'Allergy to Local Anesthesia',
+                            'malignancy' => 'History of Malignancy',
+                            'previous_surgery' => 'Previous Surgery History',
+                            'epilepsy' => 'Epilepsy/Seizures',
+                            'asthma' => 'Asthma',
+                            'pregnant' => 'Pregnant or Nursing Mother',
+                            'phobia' => 'Phobia to Dental Treatment',
+                            'stomach' => 'Stomach and Digestive Condition',
+                            'allergy' => 'Allergy',
+                            'drug_allergy' => 'Drug Allergy',
+                            'smoker' => 'Smoker',
+                            'alcoholic' => 'Alcoholic'
+                        ];
+
+                        foreach ($medical_conditions as $key => $label): 
+                            if (isset($medicalHistory[$key]) && $medicalHistory[$key] == 1):
+                        ?>
                             <div class="history-item">
-                                <label><?php echo ucwords(str_replace('_', ' ', $key)); ?>:</label>
-                                <span><?php echo $value ? 'Yes' : 'No'; ?></span>
+                                <label><?php echo $label; ?></label>
+                                <span class="status-indicator">✓</span>
                             </div>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
+                        <?php 
+                            endif;
+                        endforeach; 
+                        
+                        if (!empty($medicalHistory['other_conditions'])): 
+                        ?>
+                            <div class="history-item full-width">
+                                <label>Other Conditions:</label>
+                                <span><?php echo htmlspecialchars($medicalHistory['other_conditions']); ?></span>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </section>
 

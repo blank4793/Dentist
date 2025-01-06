@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body>
     <div class="login-container">
         <div class="login-box">
-            <img src="tooth-icon.png" alt="Dental Clinic Logo" class="logo">
+            <img src="images/logo.jpeg" alt="Dental Clinic Logo" class="logo">
             <h1>THE DENTAL CLINIC</h1>
             <?php if (isset($error)): ?>
                 <div class="error-message"><?php echo $error; ?></div>
