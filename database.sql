@@ -13,7 +13,7 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Patients table with all fields
+-- Patients table
 CREATE TABLE patients (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
@@ -35,17 +35,14 @@ CREATE TABLE patients (
     -- Medical information
     diagnosis TEXT,
     treatment_advised TEXT,
-    selected_teeth VARCHAR(255),
+    selected_teeth TEXT,
     
     -- System fields
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
     -- Indexes
     INDEX idx_name (name),
-    INDEX idx_phone (phone),
-    INDEX idx_email (email),
-    INDEX idx_sector (sector),
-    INDEX idx_gender (gender)
+    INDEX idx_phone (phone)
 );
 
 -- Medical history table
@@ -72,6 +69,7 @@ CREATE TABLE medical_history (
     smoker BOOLEAN DEFAULT FALSE,
     alcoholic BOOLEAN DEFAULT FALSE,
     other_conditions TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
 );
 
@@ -86,8 +84,8 @@ CREATE TABLE treatments (
     status ENUM('pending', 'completed') DEFAULT 'pending',
     treatment_date DATE,
     notes TEXT,
-    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
-    INDEX idx_patient_treatment (patient_id, treatment_name)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
 );
 
 -- Visits table
@@ -96,52 +94,24 @@ CREATE TABLE visits (
     patient_id INT NOT NULL,
     visit_number INT NOT NULL,
     visit_date DATE,
-    treatment VARCHAR(255),
-    amount_paid DECIMAL(10,2),
-    balance DECIMAL(10,2),
-    payment_mode VARCHAR(50),
-    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
-    INDEX idx_patient_visit (patient_id, visit_date)
-);
-
--- Dental treatments table
-CREATE TABLE dental_treatments (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    patient_id INT NOT NULL,
-    tooth_number VARCHAR(2) NOT NULL,
-    treatment_type VARCHAR(50) NOT NULL,
-    notes TEXT,
-    status ENUM('planned', 'in_progress', 'completed') DEFAULT 'planned',
-    treatment_date DATE,
-    price DECIMAL(10,2),
-    surface VARCHAR(50),
-    material VARCHAR(50),
-    shade VARCHAR(20),
+    treatment_done TEXT,
+    amount_paid DECIMAL(10,2) DEFAULT 0,
+    balance DECIMAL(10,2) DEFAULT 0,
+    payment_mode ENUM('cash', 'card', 'insurance') DEFAULT 'cash',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
-    INDEX idx_patient_tooth (patient_id, tooth_number)
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
 );
 
--- Tooth conditions table
-CREATE TABLE tooth_conditions (
+-- Billing table
+CREATE TABLE billing (
     id INT PRIMARY KEY AUTO_INCREMENT,
     patient_id INT NOT NULL,
-    tooth_number VARCHAR(2) NOT NULL,
-    condition_type ENUM('caries', 'missing', 'filled', 'crown', 'bridge', 'implant', 'root_canal'),
-    notes TEXT,
-    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
-    INDEX idx_patient_tooth_condition (patient_id, tooth_number)
-);
-
--- Treatment history table
-CREATE TABLE treatment_history (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    dental_treatment_id INT NOT NULL,
-    status_change ENUM('planned', 'in_progress', 'completed'),
-    notes TEXT,
-    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (dental_treatment_id) REFERENCES dental_treatments(id) ON DELETE CASCADE
+    total_amount DECIMAL(10,2) NOT NULL,
+    discount_type ENUM('percentage', 'fixed') DEFAULT 'fixed',
+    discount_value DECIMAL(10,2) DEFAULT 0,
+    net_total DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
 );
 
 -- Insert default admin user
