@@ -120,8 +120,8 @@ try {
         }
 
         .section {
-            margin-bottom: 30px;
-            padding: 20px;
+            margin-bottom: 20px;
+            padding: 15px;
             background: #f8f9fa;
             border-radius: 8px;
         }
@@ -140,27 +140,24 @@ try {
         }
 
         .info-item {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .info-label {
-            font-weight: bold;
-            color: #34495e;
+            display: block;
+            margin-bottom: 4px;
         }
 
         .medical-history-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px;
+            padding: 10px;
         }
 
         .medical-item {
-            background-color: #ffeaea;
-            padding: 8px 15px;
-            border-radius: 4px;
-            color: #e74c3c;
-            font-weight: 500;
+            padding: 6px 12px;
+            font-size: 0.9em;
         }
 
         .medical-item.full-width {
@@ -224,12 +221,14 @@ try {
         }
 
         .dental-chart-view {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
+            max-width: 500px;
+            margin: 10px 0;
+            padding: 15px;
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            float: left;
+            width: 48%;
         }
 
         .dental-chart-view svg {
@@ -308,6 +307,20 @@ try {
             margin-top: 10px;
             border-top: 1px solid #000;
             width: 300px;
+        }
+
+        /* Add a container for diagnosis and treatment advised */
+        .dental-info-container {
+            float: right;
+            width: 48%;
+            padding: 15px;
+        }
+
+        /* Clear the float */
+        .section::after {
+            content: "";
+            display: table;
+            clear: both;
         }
     </style>
 </head>
@@ -430,27 +443,27 @@ try {
                             <!-- Dental Chart Display -->
                             <div class="dental-chart-view">
                                 <?php 
-                                // Get selected teeth array
                                 $selectedTeethArray = explode(',', $patient['selected_teeth']);
-                                
-                                // Include the dental chart template
                                 include '../templates/dental-chart.html';
                                 ?>
                             </div>
 
-                            <?php if ($patient['diagnosis']): ?>
-                                <div class="info-item">
-                                    <span class="info-label">Diagnosis:</span>
-                                    <span><?php echo nl2br(htmlspecialchars($patient['diagnosis'])); ?></span>
-                                </div>
-                            <?php endif; ?>
+                            <!-- Add container for diagnosis and treatment -->
+                            <div class="dental-info-container">
+                                <?php if ($patient['diagnosis']): ?>
+                                    <div class="info-item">
+                                        <span class="info-label">Diagnosis:</span>
+                                        <span><?php echo nl2br(htmlspecialchars($patient['diagnosis'])); ?></span>
+                                    </div>
+                                <?php endif; ?>
 
-                            <?php if ($patient['treatment_advised']): ?>
-                                <div class="info-item">
-                                    <span class="info-label">Treatment Advised:</span>
-                                    <span><?php echo nl2br(htmlspecialchars($patient['treatment_advised'])); ?></span>
-                                </div>
-                            <?php endif; ?>
+                                <?php if ($patient['treatment_advised']): ?>
+                                    <div class="info-item">
+                                        <span class="info-label">Treatment Advised:</span>
+                                        <span><?php echo nl2br(htmlspecialchars($patient['treatment_advised'])); ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         </div>
 
                         <!-- Treatments -->
@@ -623,6 +636,9 @@ try {
         const patientName = patientNameElement ? patientNameElement.textContent.trim() : 'patient';
         const date = new Date().toISOString().split('T')[0];
 
+        // Get the logo element
+        const logoImg = document.querySelector('.header img.logo');
+
         const loadingOverlay = document.createElement('div');
         loadingOverlay.style.cssText = `
             position: fixed;
@@ -648,13 +664,7 @@ try {
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 40;
-
-        // Get the logo
-        const logoImg = document.querySelector('.header img.logo');
-        
-        // Get all sections
-        const sections = document.querySelectorAll('.section');
-        let currentY = 20; // Starting Y position
+        let currentY = 20;
 
         // Function to add page number
         function addPageNumber(doc, pageNumber) {
@@ -662,81 +672,87 @@ try {
             doc.text(`Page ${pageNumber}`, pageWidth - 60, pageHeight - 20);
         }
 
-        // Promise to handle logo addition
-        const addLogo = new Promise((resolve) => {
-            if (logoImg) {
-                const logoWidth = 100;
-                const logoHeight = 100 * (logoImg.height / logoImg.width);
-                doc.addImage(
-                    logoImg.src,
-                    'JPEG',
-                    (pageWidth - logoWidth) / 2,
-                    currentY,
-                    logoWidth,
-                    logoHeight
-                );
-                currentY += logoHeight + margin;
-            }
-            resolve();
-        });
-
-        // Process each section
-        addLogo.then(() => {
+        // Process each section with optimized spacing
+        async function processSections() {
             let pageNumber = 1;
             addPageNumber(doc, pageNumber);
 
-            // Convert sections to array for easier processing
-            const sectionsArray = Array.from(sections);
+            // Add logo first if it exists
+            if (logoImg && logoImg.complete) {
+                try {
+                    const logoWidth = 100;
+                    const logoHeight = 100 * (logoImg.height / logoImg.width);
+                    doc.addImage(
+                        logoImg.src,
+                        'JPEG',
+                        (pageWidth - logoWidth) / 2,
+                        currentY,
+                        logoWidth,
+                        logoHeight
+                    );
+                    currentY += logoHeight + 20; // Reduced margin after logo
+                } catch (error) {
+                    console.error('Error adding logo:', error);
+                    // Continue without logo if there's an error
+                }
+            }
+
+            // Get all sections
+            const sections = document.querySelectorAll('.section');
             
-            const processSection = (index) => {
-                if (index >= sectionsArray.length) {
-                    // All sections processed, save the PDF
-                    const filename = `${patientName}_dental_record_${date}.pdf`;
-                    doc.save(filename);
-                    actionButtons.style.display = 'flex';
-                    document.body.removeChild(loadingOverlay);
-                    return;
+            for (let i = 0; i < sections.length; i++) {
+                const section = sections[i];
+                
+                // Skip empty sections or sections with no visible content
+                if (!section.offsetHeight || !section.querySelector('h3')) {
+                    continue;
                 }
 
-                const section = sectionsArray[index];
-                html2canvas(section, {
+                // Capture section content
+                const canvas = await html2canvas(section, {
                     scale: 2,
                     useCORS: true,
                     logging: false,
-                    allowTaint: true
-                }).then(canvas => {
-                    const imgData = canvas.toDataURL('image/png');
-                    const imgProps = doc.getImageProperties(imgData);
-                    const imgWidth = pageWidth - (margin * 2);
-                    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-
-                    // Check if we need a new page
-                    if (currentY + imgHeight > pageHeight - margin) {
-                        doc.addPage();
-                        currentY = margin;
-                        pageNumber++;
-                        addPageNumber(doc, pageNumber);
+                    allowTaint: true,
+                    height: section.scrollHeight,
+                    windowHeight: section.scrollHeight,
+                    onclone: function(clonedDoc) {
+                        const clonedSection = clonedDoc.querySelector('.section');
+                        if (clonedSection) {
+                            // Remove any extra padding/margins
+                            clonedSection.style.margin = '0';
+                            clonedSection.style.padding = '10px';
+                        }
                     }
-
-                    // Add section title
-                    const sectionTitle = section.querySelector('h3').textContent;
-                    doc.setFontSize(14);
-                    doc.setFont(undefined, 'bold');
-                    doc.text(sectionTitle, margin, currentY + 15);
-                    currentY += 30;
-
-                    // Add section content
-                    doc.addImage(imgData, 'PNG', margin, currentY, imgWidth, imgHeight);
-                    currentY += imgHeight + margin;
-
-                    // Process next section
-                    processSection(index + 1);
                 });
-            };
 
-            // Start processing sections
-            processSection(0);
-        }).catch(error => {
+                const imgData = canvas.toDataURL('image/png');
+                const imgProps = doc.getImageProperties(imgData);
+                const imgWidth = pageWidth - (margin * 2);
+                const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+                // Check if we need a new page
+                if (currentY + imgHeight > pageHeight - margin) {
+                    doc.addPage();
+                    currentY = margin;
+                    pageNumber++;
+                    addPageNumber(doc, pageNumber);
+                }
+
+                // Add section content with minimal spacing
+                doc.addImage(imgData, 'PNG', margin, currentY, imgWidth, imgHeight);
+                currentY += imgHeight + 15; // Reduced spacing between sections
+            }
+
+            // Save the PDF
+            const filename = `${patientName}_dental_record_${date}.pdf`;
+            doc.save(filename);
+            actionButtons.style.display = 'flex';
+            document.body.removeChild(loadingOverlay);
+        }
+
+        // Start processing with error handling
+        processSections().catch(error => {
             console.error('Error generating PDF:', error);
             actionButtons.style.display = 'flex';
             document.body.removeChild(loadingOverlay);
