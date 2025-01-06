@@ -94,14 +94,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach ($treatments as $treatment) {
                 $stmt = $pdo->prepare("
                     INSERT INTO treatments (
-                        patient_id, treatment_name, price, 
-                        status, treatment_date
-                    ) VALUES (?, ?, ?, 'pending', NOW())
+                        patient_id, 
+                        treatment_name, 
+                        quantity,
+                        price_per_unit,
+                        total_price,
+                        status, 
+                        treatment_date
+                    ) VALUES (?, ?, ?, ?, ?, 'pending', NOW())
                 ");
+                
                 $stmt->execute([
                     $patientId,
                     $treatment['name'],
-                    $treatment['price']
+                    $treatment['quantity'],
+                    $treatment['pricePerUnit'],
+                    $treatment['totalPrice']
                 ]);
             }
         }
@@ -501,7 +509,7 @@ if (isset($patientId)) {
                     <div class="visits-section">
                         <h3>VISITS TRACKING</h3>
                         <div class="visits-table">
-                            <table>
+                            <table id="visitsTable">
                                 <thead>
                                     <tr>
                                         <th>NO. OF VISITS</th>
@@ -519,7 +527,13 @@ if (isset($patientId)) {
                                         <td><input type="number" class="balance-input" name="visit_balance[]" readonly></td>
                                         <td><input type="date" class="date-input" name="visit_date[]"></td>
                                         <td><input type="text" class="treatment-input" name="visit_treatment[]"></td>
-                                        <td><input type="text" class="mode-input" name="visit_mode[]"></td>
+                                        <td>
+                                            <select name="visit_mode[]" class="mode-input">
+                                                <option value="cash">Cash</option>
+                                                <option value="card">Card</option>
+                                                <option value="insurance">Insurance</option>
+                                            </select>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>

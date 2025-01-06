@@ -15,3 +15,160 @@ body{
     fill:#dddddd !important;
   }
 }
+
+.dental-chart-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.dental-chart-container svg {
+    width: 100%;
+    height: auto;
+}
+
+/* Tooth selection styles */
+#Spots polygon, #Spots path {
+    cursor: pointer;
+    transition: fill 0.3s ease;
+}
+
+#Spots polygon:hover, #Spots path:hover {
+    fill: #e0e0e0;
+}
+
+#Spots .selected {
+    fill: #90caf9 !important;
+}
+
+/* Read-only styles */
+.dental-chart-container.readonly #Spots polygon,
+.dental-chart-container.readonly #Spots path {
+    cursor: default;
+}
+
+.dental-chart-container.readonly #Spots polygon:hover,
+.dental-chart-container.readonly #Spots path:hover {
+    fill: #FFFFFF;
+}
+
+.dental-chart-container.readonly #Spots .selected {
+    fill: #90caf9 !important;
+}
+
+/* Visit table styles */
+.text-danger {
+    color: #dc3545 !important;
+}
+
+#visitsTable input[readonly] {
+    background-color: #e9ecef;
+}
+
+#visitsTable tfoot {
+    font-weight: bold;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.remove-visit {
+    padding: 0.25rem 0.5rem;
+}
+
+/* Visit section styles */
+.visits-section {
+    margin: 20px 0;
+}
+
+.visits-table {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.visits-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.visits-table th,
+.visits-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.visits-table input,
+.visits-table select {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ddd;
+}
+
+.visits-table .balance-input {
+    background-color: #f8f9fa;
+}
+
+.totals-row {
+    font-weight: bold;
+    background-color: #f8f9fa;
+}
+
+.add-visit-btn {
+    margin-top: 10px;
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.add-visit-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Add these styles for money amounts and remove button */
+.price-per-unit, .total-price, #totalAmount, #netTotal {
+    color: #28a745;  /* Green color for money */
+    font-weight: bold;
+}
+
+.remove-treatment {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.remove-treatment:hover {
+    background-color: #c82333;
+}
+
+/* Style for the treatment table */
+.selected-treatments-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.selected-treatments-table th,
+.selected-treatments-table td {
+    padding: 10px;
+    border: 1px solid #dee2e6;
+}
+
+.selected-treatments-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+/* Style for quantity input */
+.quantity-input {
+    width: 70px;
+    padding: 5px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
