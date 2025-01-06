@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config.php';
+require_once '../includes/config.php';
 
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
@@ -12,7 +12,7 @@ $stmt = $pdo->query("SELECT COUNT(*) FROM patients");
 $totalPatients = $stmt->fetchColumn();
 
 // Get today's appointments
-$stmt = $pdo->prepare("SELECT COUNT(*) FROM treatments WHERE treatment_date = CURDATE()");
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM dental_treatments WHERE DATE(created_at) = CURDATE()");
 $stmt->execute();
 $todayAppointments = $stmt->fetchColumn();
 
@@ -20,7 +20,7 @@ $todayAppointments = $stmt->fetchColumn();
 $stmt = $pdo->prepare("
     SELECT p.*, t.treatment_name, t.status 
     FROM patients p 
-    LEFT JOIN treatments t ON p.id = t.patient_id 
+    LEFT JOIN dental_treatments t ON p.id = t.patient_id 
     ORDER BY p.created_at DESC 
     LIMIT 10
 ");
@@ -34,11 +34,13 @@ $recentPatients = $stmt->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dental Clinic - Dashboard</title>
-    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="stylesheet" href="../css/dashboard-styles.css">
 </head>
 <body>
     <div class="dashboard-container">
-        <?php include 'header.php'; ?>
+        <?php 
+        include '../includes/header.php'; 
+        ?>
         
         <!-- Main Content -->
         <div class="main-content">
@@ -92,7 +94,5 @@ $recentPatients = $stmt->fetchAll();
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="script.js"></script>
-</body>
-</html> 
+    <script src="../js/script.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script> 

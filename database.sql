@@ -1,4 +1,15 @@
--- Create and use the database
+-- First force close all connections to the database
+SELECT concat('KILL ',id,';') 
+FROM INFORMATION_SCHEMA.PROCESSLIST 
+WHERE db = 'dental_clinic' 
+AND id != CONNECTION_ID();
+
+-- Force drop all tables first
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS users, patients, medical_history, dental_treatments, visits;
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- Now recreate the database
 DROP DATABASE IF EXISTS dental_clinic;
 CREATE DATABASE dental_clinic;
 USE dental_clinic;
@@ -18,29 +29,19 @@ CREATE TABLE patients (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
     date DATE NOT NULL,
-    
-    -- Address fields
     sector VARCHAR(50),
     street_no VARCHAR(50),
     house_no VARCHAR(50),
     non_islamabad_address TEXT,
-    
-    -- Personal information
     phone VARCHAR(20) NOT NULL,
     age INT,
     gender ENUM('Male', 'Female', 'Other'),
     occupation VARCHAR(100),
     email VARCHAR(100),
-    
-    -- Medical information
-    diagnosis TEXT,
-    treatment_advised TEXT,
-    selected_teeth TEXT,
-    
-    -- System fields
+    diagnosis TEXT NULL,
+    treatment_advised TEXT NULL,
+    selected_teeth TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
-    -- Indexes
     INDEX idx_name (name),
     INDEX idx_phone (phone)
 );
@@ -73,17 +74,20 @@ CREATE TABLE medical_history (
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
 );
 
--- Treatments table
-CREATE TABLE treatments (
+-- Dental treatments table (includes billing info)
+CREATE TABLE dental_treatments (
     id INT PRIMARY KEY AUTO_INCREMENT,
     patient_id INT NOT NULL,
+    tooth_number VARCHAR(10),
     treatment_name VARCHAR(100) NOT NULL,
     quantity INT DEFAULT 1,
-    price_per_unit DECIMAL(10,2) NOT NULL,
-    total_price DECIMAL(10,2) NOT NULL,
-    status ENUM('pending', 'completed') DEFAULT 'pending',
-    treatment_date DATE,
+    price_per_unit DECIMAL(10,2),
+    total_price DECIMAL(10,2),
+    discount_type ENUM('percentage', 'fixed') DEFAULT 'percentage',
+    discount_value DECIMAL(10,2) DEFAULT 0,
+    net_total DECIMAL(10,2),
     notes TEXT,
+    status VARCHAR(20) DEFAULT 'planned',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
 );
@@ -92,28 +96,15 @@ CREATE TABLE treatments (
 CREATE TABLE visits (
     id INT PRIMARY KEY AUTO_INCREMENT,
     patient_id INT NOT NULL,
-    visit_number INT NOT NULL,
     visit_date DATE,
     treatment_done TEXT,
-    amount_paid DECIMAL(10,2) DEFAULT 0,
+    visit_amount DECIMAL(10,2) DEFAULT 0,
+    visit_mode ENUM('cash', 'card', 'insurance') DEFAULT 'cash',
     balance DECIMAL(10,2) DEFAULT 0,
-    payment_mode ENUM('cash', 'card', 'insurance') DEFAULT 'cash',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
-);
-
--- Billing table
-CREATE TABLE billing (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    patient_id INT NOT NULL,
-    total_amount DECIMAL(10,2) NOT NULL,
-    discount_type ENUM('percentage', 'fixed') DEFAULT 'fixed',
-    discount_value DECIMAL(10,2) DEFAULT 0,
-    net_total DECIMAL(10,2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
 );
 
 -- Insert default admin user
 INSERT INTO users (username, password, name, role) 
-VALUES ('admin', '$2y$10$YourHashedPasswordHere', 'Administrator', 'admin'); 
+VALUES ('admin', '123', 'Administrator', 'admin'); 

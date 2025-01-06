@@ -2,7 +2,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
-require_once 'config.php';
+require_once '../includes/config.php';
 
 // Add debug logging
 $debug = [];
@@ -47,17 +47,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dental Clinic - Login</title>
-    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
     <div class="login-container">
         <div class="login-box">
-            <img src="images/logo.jpeg" alt="Dental Clinic Logo" class="logo">
+            <img src="../assets/images/logo.jpeg" alt="Dental Clinic Logo" class="logo">
             <h1>THE DENTAL CLINIC</h1>
             <?php if (isset($error)): ?>
                 <div class="error-message"><?php echo $error; ?></div>
             <?php endif; ?>
-            <form method="POST" action="login.php">
+            <form method="POST" action="">
                 <div class="form-group">
                     <label for="username">Username</label>
                     <input type="text" id="username" name="username" required>

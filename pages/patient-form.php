@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config.php';
+require_once '../includes/config.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -13,41 +13,89 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $pdo->beginTransaction();
 
-        // Sanitize and validate inputs
-        $patientName = htmlspecialchars($_POST['patientName'] ?? '');
-        $date = $_POST['date'] ?? '';
-        $age = intval($_POST['age'] ?? 0);
-        $gender = htmlspecialchars($_POST['gender'] ?? '');
-        $sector = htmlspecialchars($_POST['sector'] ?? '');
-        $streetNo = htmlspecialchars($_POST['streetNo'] ?? '');
-        $houseNo = htmlspecialchars($_POST['houseNo'] ?? '');
-        $nonIslamabadAddress = htmlspecialchars($_POST['nonIslamabadAddress'] ?? '');
-        $phone = htmlspecialchars($_POST['phone'] ?? '');
-        $email = filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL);
-        $occupation = htmlspecialchars($_POST['occupation'] ?? '');
-
         // Insert patient
         $stmt = $pdo->prepare("
             INSERT INTO patients (
-                name, date, age, gender, 
-                sector, street_no, house_no, non_islamabad_address,
-                phone, email, occupation,
-                created_at
+                name, date, sector, street_no, house_no, 
+                non_islamabad_address, phone, age, gender, 
+                occupation, email, diagnosis, treatment_advised, 
+                selected_teeth
             ) VALUES (
+                ?, ?, ?, ?, ?, 
                 ?, ?, ?, ?, 
-                ?, ?, ?, ?,
-                ?, ?, ?,
-                NOW()
+                ?, ?, ?, ?, 
+                ?
             )
         ");
 
-        $stmt->execute([
-            $patientName, $date, $age, $gender,
-            $sector, $streetNo, $houseNo, $nonIslamabadAddress,
-            $phone, $email, $occupation
-        ]);
+        $values = [
+            $_POST['patientName'],
+            $_POST['date'],
+            $_POST['sector'],
+            $_POST['streetNo'],
+            $_POST['houseNo'],
+            $_POST['nonIslamabadAddress'],
+            $_POST['phone'],
+            $_POST['age'],
+            $_POST['gender'],
+            $_POST['occupation'],
+            $_POST['email'],
+            $_POST['diagnosis'],
+            $_POST['treatmentAdvised'],
+            $_POST['selected_teeth']
+        ];
 
-        $patientId = $pdo->lastInsertId();
+        $stmt->execute($values);
+        $patientId = $pdo->lastInsertId(); // Get the patient ID first
+
+        // Now show debug information
+        echo "<div style='
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            width: 80%; 
+            max-width: 800px; 
+            max-height: 80vh; 
+            overflow-y: auto; 
+            background: #f5f5f5; 
+            padding: 20px; 
+            margin: 20px; 
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            z-index: 9999;
+        '>";
+        echo "<h3 style='margin-top: 0;'>POST Data:</h3>";
+        echo "<pre style='background: white; padding: 10px; overflow-x: auto;'>";
+        print_r($_POST);
+        echo "</pre>";
+
+        echo "<h3>Values Being Inserted:</h3>";
+        echo "<pre style='background: white; padding: 10px; overflow-x: auto;'>";
+        print_r($values);
+        echo "</pre>";
+
+        echo "<button onclick='this.parentElement.style.display=\"none\";' style='
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        '>Close</button>";
+        
+        echo "<a href='view_patient.php?id=$patientId' style='
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        '>Continue to Patient View</a>";
+        echo "</div>";
 
         // Insert medical history
         $stmt = $pdo->prepare("
@@ -88,28 +136,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_POST['otherConditions'] ?? ''
         ]);
 
-        // Insert treatments if any
-        if (isset($_POST['treatments'])) {
+        // Insert treatments
+        if (!empty($_POST['treatments'])) {
             $treatments = json_decode($_POST['treatments'], true);
+            
+            $stmt = $pdo->prepare("
+                INSERT INTO dental_treatments (
+                    patient_id, 
+                    tooth_number,
+                    treatment_name, 
+                    quantity,
+                    price_per_unit,
+                    total_price,
+                    discount_type,
+                    discount_value,
+                    net_total,
+                    notes,
+                    status
+                ) VALUES (
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'planned'
+                )
+            ");
+
             foreach ($treatments as $treatment) {
-                $stmt = $pdo->prepare("
-                    INSERT INTO treatments (
-                        patient_id, 
-                        treatment_name, 
-                        quantity,
-                        price_per_unit,
-                        total_price,
-                        status, 
-                        treatment_date
-                    ) VALUES (?, ?, ?, ?, ?, 'pending', NOW())
-                ");
-                
                 $stmt->execute([
                     $patientId,
+                    $treatment['tooth_number'],
                     $treatment['name'],
                     $treatment['quantity'],
                     $treatment['pricePerUnit'],
-                    $treatment['totalPrice']
+                    $treatment['totalPrice'],
+                    $_POST['discountType'],
+                    $_POST['discountValue'],
+                    $treatment['netTotal'],
+                    $treatment['notes'] ?? null
                 ]);
             }
         }
@@ -120,8 +180,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!empty($_POST['visit_date'][$i])) {
                     $stmt = $pdo->prepare("
                         INSERT INTO visits (
-                            patient_id, visit_date, treatment,
-                            amount, payment_mode, balance
+                            patient_id, 
+                            visit_date, 
+                            treatment_done,
+                            visit_amount, 
+                            visit_mode, 
+                            balance
                         ) VALUES (?, ?, ?, ?, ?, ?)
                     ");
                     $stmt->execute([
@@ -136,34 +200,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // Process dental treatments
-        if (isset($_POST['dental_treatments'])) {
-            $dentalTreatments = json_decode($_POST['dental_treatments'], true);
-            
-            foreach ($dentalTreatments as $treatment) {
-                $stmt = $pdo->prepare("
-                    INSERT INTO dental_treatments (
-                        patient_id, 
-                        tooth_number, 
-                        treatment_type,
-                        notes,
-                        status,
-                        treatment_date,
-                        price
-                    ) VALUES (?, ?, ?, ?, ?, NOW(), ?)
-                ");
-                
-                $stmt->execute([
-                    $patientId,
-                    $treatment['tooth_number'],
-                    $treatment['treatment_type'],
-                    $treatment['notes'] ?? null,
-                    'planned',
-                    $treatment['price'] ?? null
-                ]);
-            }
-        }
-
         $pdo->commit();
         $success = "Patient added successfully!";
         header("Location: view_patient.php?id=$patientId");
@@ -171,6 +207,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } catch(Exception $e) {
         $pdo->rollBack();
         $error = "Error: " . $e->getMessage();
+        echo "<div style='background: #fee; padding: 20px; margin: 20px; border-radius: 5px; color: #c00;'>";
+        echo "<h3>Error:</h3>";
+        echo $error;
+        echo "</div>";
     }
 }
 
@@ -205,17 +245,158 @@ if (isset($patientId)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Dental Clinic - Patient Registration</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dashboard-styles.css">
+    <style>
+        /* Add these styles for the dental chart */
+        .dental-chart-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .dental-chart {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .selected-teeth-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        #selectedTeethList {
+            min-height: 50px;
+            padding: 10px;
+            border: 1px dashed #ddd;
+            margin-top: 10px;
+        }
+
+        .medical-history {
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .medical-history h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .medical-history-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+        }
+
+        .condition-label {
+            font-weight: 500;
+            color: #2c3e50;
+            flex-grow: 1;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-left: 15px;
+            cursor: pointer;
+        }
+
+        .other-condition-input {
+            width: 60%;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        /* Add hover effect */
+        .history-row:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Make checkboxes more visible */
+        input[type="checkbox"] {
+            accent-color: #3498db;
+        }
+
+        .medical-history {
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .medical-history h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .medical-history-table {
+            display: flex;
+            gap: 20px;
+        }
+
+        .medical-history-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+        }
+
+        .condition-label {
+            font-weight: 500;
+            color: #2c3e50;
+            flex-grow: 1;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-left: 15px;
+            cursor: pointer;
+            accent-color: #3498db;
+        }
+
+        /* Add hover effect */
+        .history-row:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
-        <?php include 'header.php'; ?>
+        <?php include '../includes/header.php'; ?>
         
         <div class="main-content">
             <div class="container">
                 <div class="header">
-                    <img src="tooth-icon.png" alt="Dental Clinic Logo" class="logo">
+                    <img src="../assets/images/logo.jpeg" alt="Dental Clinic Logo" class="logo">
                     <h1>THE DENTAL CLINIC</h1>
                     <h2>PATIENT REGISTRATION AND MEDICAL RECORD</h2>
                 </div>
@@ -224,27 +405,40 @@ if (isset($patientId)) {
                     <div class="error-message"><?php echo $error; ?></div>
                 <?php endif; ?>
 
-                <form id="patientForm" method="POST">
+                <form id="patientForm" method="POST" action="save_patient.php">
                     <!-- Personal Information -->
                     <div class="personal-info">
                         <div class="form-row name-date">
                             <div class="form-group">
-                                <label for="patientName">PATIENT NAME</label>
-                                <input type="text" id="patientName" name="patientName" required>
+                                <label for="patientName">PATIENT NAME *</label>
+                                <input type="text" 
+                                       id="patientName" 
+                                       name="patientName" 
+                                       required 
+                                       pattern="[A-Za-z\s\-'.]{2,100}"
+                                       title="Name should only contain letters, spaces, hyphens, and apostrophes">
                             </div>
                             <div class="form-group">
-                                <label for="date">DATE</label>
-                                <input type="date" id="date" name="date" required>
+                                <label for="date">DATE *</label>
+                                <input type="date" 
+                                       id="date" 
+                                       name="date" 
+                                       required>
                             </div>
                         </div>
 
                         <div class="form-row age-gender">
                             <div class="form-group">
-                                <label for="age">AGE</label>
-                                <input type="number" id="age" name="age" min="0" required>
+                                <label for="age">AGE *</label>
+                                <input type="number" 
+                                       id="age" 
+                                       name="age" 
+                                       min="0" 
+                                       max="150" 
+                                       required>
                             </div>
                             <div class="form-group">
-                                <label for="gender">GENDER</label>
+                                <label for="gender">GENDER *</label>
                                 <select id="gender" name="gender" required>
                                     <option value="">Select Gender</option>
                                     <option value="Male">Male</option>
@@ -280,12 +474,19 @@ if (isset($patientId)) {
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="phone">PHONE NO</label>
-                                <input type="tel" id="phone" name="phone" required>
+                                <label for="phone">PHONE *</label>
+                                <input type="tel" 
+                                       id="phone" 
+                                       name="phone" 
+                                       required 
+                                       pattern="\+?\d{10,15}"
+                                       title="Phone number should be 10-15 digits, optionally starting with +">
                             </div>
                             <div class="form-group">
                                 <label for="email">EMAIL</label>
-                                <input type="email" id="email" name="email">
+                                <input type="email" 
+                                       id="email" 
+                                       name="email">
                             </div>
                         </div>
 
@@ -298,84 +499,88 @@ if (isset($patientId)) {
                     </div>
 
                     <!-- Medical History -->
-                    <h3>MEDICAL HISTORY</h3>
                     <div class="medical-history">
-                        <div class="history-grid">
-                            <div class="history-item">
-                                <input type="checkbox" id="heartProblem" name="heartProblem">
-                                <label for="heartProblem">HEART PROBLEM</label>
+                        <h3>MEDICAL HISTORY</h3>
+                        <div class="medical-history-table">
+                            <div class="medical-history-column">
+                                <div class="history-row">
+                                    <span class="condition-label">HEART PROBLEM</span>
+                                    <input type="checkbox" id="heartProblem" name="heartProblem">
+                                </div>
+                                <div class="history-row">
+                                    <span class="condition-label">BLOOD PRESSURE</span>
+                                    <input type="checkbox" id="bloodPressure" name="bloodPressure">
+                                </div>
+                                <div class="history-row">
+                                    <span class="condition-label">BLEEDING DISORDER</span>
+                                    <input type="checkbox" id="bleedingDisorder" name="bleedingDisorder">
+                                </div>
+                                <div class="history-row">
+                                    <span class="condition-label">BLOOD THINNERS etc. Loprin</span>
+                                    <input type="checkbox" id="bloodThinners" name="bloodThinners">
+                                </div>
+                                <div class="history-row">
+                                    <span class="condition-label">HEPATITIS B or C</span>
+                                    <input type="checkbox" id="hepatitis" name="hepatitis">
+                                </div>
+                                <div class="history-row">
+                                    <span class="condition-label">DIABETES/SUGAR</span>
+                                    <input type="checkbox" id="diabetes" name="diabetes">
+                                </div>
+                                <div class="history-row">
+                                    <span class="condition-label">FAINTING SPELLS</span>
+                                    <input type="checkbox" id="faintingSpells" name="faintingSpells">
+                                </div>
+                                <div class="history-row">
+                                    <span class="condition-label">ALLERGY TO LOCAL ANESTHESIA</span>
+                                    <input type="checkbox" id="allergyAnesthesia" name="allergyAnesthesia">
+                                </div>
+                                <div class="history-row">
+                                    <span class="condition-label">HISTORY OF MALIGNANCY</span>
+                                    <input type="checkbox" id="malignancy" name="malignancy">
+                                </div>
+                                <div class="history-row">
+                                    <span class="condition-label">DO YOU HAVE ANY PREVIOUS HISTORY OF ANY SURGERY</span>
+                                    <input type="checkbox" id="previousSurgery" name="previousSurgery">
+                                </div>
                             </div>
-                            <div class="history-item">
-                                <input type="checkbox" id="bloodPressure" name="bloodPressure">
-                                <label for="bloodPressure">BLOOD PRESSURE</label>
-                            </div>
-                            <div class="history-item">
-                                <input type="checkbox" id="bleedingDisorder" name="bleedingDisorder">
-                                <label for="bleedingDisorder">BLEEDING DISORDER</label>
-                            </div>
-                            <div class="history-item">
-                                <input type="checkbox" id="bloodThinners" name="bloodThinners">
-                                <label for="bloodThinners">BLOOD THINNERS etc. Loprin</label>
-                            </div>
-                            <div class="history-item">
-                                <input type="checkbox" id="hepatitis" name="hepatitis">
-                                <label for="hepatitis">HEPATITIS B or C</label>
-                            </div>
-                            <div class="history-item">
-                                <input type="checkbox" id="diabetes" name="diabetes">
-                                <label for="diabetes">DIABETES /SUGAR</label>
-                            </div>
-                            <div class="history-item">
-                                <input type="checkbox" id="faintingSpells" name="faintingSpells">
-                                <label for="faintingSpells">FAINTING SPELLS</label>
-                            </div>
-                            <div class="history-item">
-                                <input type="checkbox" id="allergyAnesthesia" name="allergyAnesthesia">
-                                <label for="allergyAnesthesia">ALLERGY TO LOCAL ANESTHESIA</label>
-                            </div>
-                            <div class="history-item">
-                                <input type="checkbox" id="malignancy" name="malignancy">
-                                <label for="malignancy">HISTORY OF MALIGNANCY</label>
-                            </div>
-                            <div class="history-item">
-                                <input type="checkbox" id="previousSurgery" name="previousSurgery">
-                                <label for="previousSurgery">DO YOU HAVE ANY PREVIOUS HISTORY OF ANY SURGERY</label>
-                            </div>
-                            <div class="history-item">
-                                <input type="checkbox" id="epilepsy" name="epilepsy">
-                                <label for="epilepsy">EPILEPSY/ SEIZURES</label>
-                            </div>
-                            <div class="history-item">
-                                <input type="checkbox" id="asthma" name="asthma">
-                                <label for="asthma">ASTHMA</label>
-                            </div>
-                            <div class="history-item">
-                                <input type="checkbox" id="pregnant" name="pregnant">
-                                <label for="pregnant">PREGNANT OR NURSING MOTHER</label>
-                            </div>
-                            <div class="history-item">
-                                <input type="checkbox" id="phobia" name="phobia">
-                                <label for="phobia">PHOEBIA TO DENTAL TREATMENT</label>
-                            </div>
-                            <div class="history-item">
-                                <input type="checkbox" id="stomach" name="stomach">
-                                <label for="stomach">STOMACH AND DIGESTIVE CONDITION</label>
-                            </div>
-                            <div class="history-item">
-                                <input type="checkbox" id="allergy" name="allergy">
-                                <label for="allergy">ALLERGY</label>
-                            </div>
-                            <div class="history-item">
-                                <input type="checkbox" id="drugAllergy" name="drugAllergy">
-                                <label for="drugAllergy">DRUG ALLERGY</label>
-                            </div>
-                            <div class="history-item">
-                                <input type="checkbox" id="smoker" name="smoker">
-                                <label for="smoker">SMOKER...?</label>
-                            </div>
-                            <div class="history-item">
-                                <input type="checkbox" id="alcoholic" name="alcoholic">
-                                <label for="alcoholic">ALCOHOLIC...?</label>
+                            <div class="medical-history-column">
+                                <div class="history-row">
+                                    <span class="condition-label">EPILEPSY/SEIZURES</span>
+                                    <input type="checkbox" id="epilepsy" name="epilepsy">
+                                </div>
+                                <div class="history-row">
+                                    <span class="condition-label">ASTHMA</span>
+                                    <input type="checkbox" id="asthma" name="asthma">
+                                </div>
+                                <div class="history-row">
+                                    <span class="condition-label">PREGNANT OR NURSING MOTHER</span>
+                                    <input type="checkbox" id="pregnant" name="pregnant">
+                                </div>
+                                <div class="history-row">
+                                    <span class="condition-label">PHOEBIA TO DENTAL TREATMENT</span>
+                                    <input type="checkbox" id="phobia" name="phobia">
+                                </div>
+                                <div class="history-row">
+                                    <span class="condition-label">STOMACH AND DIGESTIVE CONDITION</span>
+                                    <input type="checkbox" id="stomach" name="stomach">
+                                </div>
+                                <div class="history-row">
+                                    <span class="condition-label">ALLERGY</span>
+                                    <input type="checkbox" id="allergy" name="allergy">
+                                </div>
+                                <div class="history-row">
+                                    <span class="condition-label">DRUG ALLERGY</span>
+                                    <input type="checkbox" id="drugAllergy" name="drugAllergy">
+                                </div>
+                                <div class="history-row">
+                                    <span class="condition-label">SMOKER...?</span>
+                                    <input type="checkbox" id="smoker" name="smoker">
+                                </div>
+                                <div class="history-row">
+                                    <span class="condition-label">ALCOHOLIC...?</span>
+                                    <input type="checkbox" id="alcoholic" name="alcoholic">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -404,10 +609,11 @@ if (isset($patientId)) {
                     <div class="dental-chart-section">
                         <h3>DENTAL CHART</h3>
                         <div class="chart-container">
-                            <?php include 'dental-chart.html'; ?>
+                            <?php include '../templates/dental-chart.html'; ?>
                             <div class="selected-teeth-info">
-                                <h3>Selected Teeth</h3>
+                                <h4>Selected Teeth</h4>
                                 <div id="selectedTeethList"></div>
+                                <input type="hidden" id="selectedTeethInput" name="selected_teeth" value="">
                             </div>
                         </div>
                     </div>
@@ -473,19 +679,21 @@ if (isset($patientId)) {
                                 <thead>
                                     <tr>
                                         <th>Treatment</th>
-                                        <th>Amount</th>
+                                        <th>Quantity</th>
+                                        <th>Price Per Unit</th>
+                                        <th>Total Amount</th>
                                     </tr>
                                 </thead>
                                 <tbody id="billingList">
-                                    <!-- Treatment amounts will be added here dynamically -->
+                                    <!-- Treatments will be added here dynamically -->
                                 </tbody>
                                 <tfoot>
                                     <tr class="total-row">
-                                        <td>TOTAL AMOUNT</td>
-                                        <td><span id="totalAmount">₹0</span></td>
+                                        <td colspan="3">TOTAL AMOUNT</td>
+                                        <td><span id="totalAmount">₹0.00</span></td>
                                     </tr>
                                     <tr class="discount-row">
-                                        <td>
+                                        <td colspan="3">
                                             DISCOUNT
                                             <select id="discountType" name="discountType">
                                                 <option value="percentage">Percentage (%)</option>
@@ -493,12 +701,17 @@ if (isset($patientId)) {
                                             </select>
                                         </td>
                                         <td>
-                                            <input type="number" id="discountValue" name="discountValue" min="0" placeholder="Enter discount">
+                                            <input type="number" 
+                                                   id="discountValue" 
+                                                   name="discountValue" 
+                                                   min="0" 
+                                                   step="any"
+                                                   value="0">
                                         </td>
                                     </tr>
                                     <tr class="net-total-row">
-                                        <td>NET TOTAL</td>
-                                        <td><span id="netTotal">₹0</span></td>
+                                        <td colspan="3">NET TOTAL</td>
+                                        <td><span id="netTotal">₹0.00</span></td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -528,7 +741,8 @@ if (isset($patientId)) {
                                         <td><input type="date" class="date-input" name="visit_date[]"></td>
                                         <td><input type="text" class="treatment-input" name="visit_treatment[]"></td>
                                         <td>
-                                            <select name="visit_mode[]" class="mode-input">
+                                            <select name="visit_mode[]" class="mode-input" required>
+                                                <option value="">Select Payment Mode</option>
                                                 <option value="cash">Cash</option>
                                                 <option value="card">Card</option>
                                                 <option value="insurance">Insurance</option>
@@ -541,7 +755,7 @@ if (isset($patientId)) {
                         </div>
                     </div>
 
-                    <input type="hidden" id="selectedTeethInput" name="selected_teeth" value="">
+                    <input type="hidden" id="treatmentsInput" name="treatments" value="">
 
                     <button type="submit" class="submit-btn">Submit Registration</button>
                 </form>
@@ -550,6 +764,16 @@ if (isset($patientId)) {
     </div>
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="script.js"></script>
+    <script>
+        // Check if jQuery is loaded
+        if (typeof jQuery === 'undefined') {
+            console.error('jQuery is not loaded!');
+        } else {
+            console.log('jQuery is loaded');
+        }
+    </script>
+    <script src="../js/shared.js"></script>
+    <script src="../js/form-submission.js"></script>
+    <script src="../js/dental-chart.js"></script>
 </body>
 </html> 

@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config.php';
+require_once '../includes/config.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -28,12 +28,12 @@ $patients = $stmt->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient List - Dental Clinic</title>
-    <link rel="stylesheet" href="dashboard-styles.css">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dashboard-styles.css">
 </head>
 <body>
     <div class="dashboard-container">
-        <?php include 'header.php'; ?>
+        <?php include '../includes/header.php'; ?>
         
         <div class="main-content">
             <div class="header-section">

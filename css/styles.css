@@ -382,44 +382,75 @@ h1, h2 {
 
 /* Add these styles for the billing section */
 .billing-section {
-    margin: 40px 0;
+    margin: 20px 0;
     padding: 20px;
-    border: 1px solid var(--border-color);
+    background: #fff;
     border-radius: 8px;
-    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.billing-section h3 {
+    margin-bottom: 20px;
+    color: #333;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
 }
 
 .billing-table table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .billing-table th,
 .billing-table td {
     padding: 12px;
     text-align: left;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid #eee;
 }
 
 .billing-table th {
-    background-color: var(--background-color);
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.billing-table tfoot tr {
+    background-color: #f8f9fa;
+}
+
+.billing-table .total-row,
+.billing-table .net-total-row {
     font-weight: bold;
-    color: var(--secondary-color);
 }
 
-.billing-table input[type="number"] {
-    width: 120px;
-    padding: 6px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
+.billing-table .discount-row {
+    background-color: #fff3e0;
 }
 
-.billing-table select {
-    padding: 6px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
+.billing-table .discount-row select,
+.billing-table .discount-row input {
     margin-left: 10px;
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.billing-table .discount-row input {
+    width: 100px;
+}
+
+/* Currency alignment */
+.billing-table td:nth-child(3),
+.billing-table td:nth-child(4),
+.billing-table th:nth-child(3),
+.billing-table th:nth-child(4) {
+    text-align: right;
+}
+
+/* Quantity column */
+.billing-table td:nth-child(2),
+.billing-table th:nth-child(2) {
+    text-align: center;
 }
 
 .total-row {
@@ -698,4 +729,213 @@ h3 {
     border-radius: 4px;
     padding: 8px;
     font-size: 14px;
+}
+
+.header .logo {
+    width: 150px;  /* Adjust based on your logo's dimensions */
+    height: auto;
+    margin-bottom: 15px;
+    border-radius: 5px; /* Optional: if you want rounded corners */
+}
+
+/* View Patient Styles */
+.patient-details {
+    margin: 20px 0;
+}
+
+.detail-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.detail-section h3 {
+    color: #333;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #eee;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.detail-item label {
+    font-weight: bold;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.medical-history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.status-indicator {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.selected-teeth {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.tooth-number {
+    background: #e9ecef;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.data-table th,
+.data-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.data-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.action-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* Diagnosis and Treatment Plan styles */
+.diagnosis-treatment {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.diagnosis-treatment .detail-item {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+}
+
+.diagnosis-treatment label {
+    display: block;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.diagnosis-treatment .content {
+    line-height: 1.5;
+    color: #666;
+}
+
+/* Selected Teeth styles */
+.selected-teeth {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.tooth-number {
+    background: #fff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #333;
+    border: 1px solid #dee2e6;
+}
+
+/* Treatments & Billing styles */
+.data-table {
+    width: 100%;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.data-table th {
+    background: #f8f9fa;
+    padding: 12px;
+    font-weight: 600;
+    color: #333;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.data-table td {
+    padding: 12px;
+    border-bottom: 1px solid #dee2e6;
+    color: #666;
+}
+
+.data-table tfoot td {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+.no-data {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    color: #666;
+    text-align: center;
+    font-style: italic;
+}
+
+/* Common styles */
+.detail-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.detail-section h3 {
+    color: #333;
+    font-size: 18px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #eee;
 } 

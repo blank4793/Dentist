@@ -28,88 +28,119 @@ $(document).ready(function() {
         rootPlanning: 5000
     };
 
-    // Treatment selection handling
-    $('#treatmentSelect').change(function() {
-        const selectedOption = $(this).find('option:selected');
-        const treatmentName = selectedOption.text().split('(')[0].trim();
-        const price = parseInt(selectedOption.text().match(/₹(\d+)/)[1]);
+    let treatments = [];
+
+    document.getElementById('treatmentSelect').addEventListener('change', function() {
+        const select = this;
+        const selectedOption = select.options[select.selectedIndex];
+        if (!selectedOption.value) return;
+
+        // Get price from treatmentPrices mapping instead of parsing text
+        const treatmentName = selectedOption.text.split('(')[0].trim();
+        const pricePerUnit = treatmentPrices[selectedOption.value]; // Use the mapping
         
-        if (treatmentName && price) {
-            addTreatmentRow(treatmentName, price);
-            $(this).val(''); // Reset select
+        if (!pricePerUnit) {
+            console.error('Price not found for treatment:', selectedOption.value);
+            return;
         }
-    });
 
-    // Add treatment row with quantity
-    function addTreatmentRow(treatmentName, pricePerUnit) {
-        const newRow = `
-            <tr>
-                <td>${treatmentName}</td>
-                <td>
-                    <input type="number" class="quantity-input" value="1" min="1">
-                </td>
-                <td class="price-per-unit">₹${pricePerUnit.toLocaleString()}</td>
-                <td class="total-price">₹${pricePerUnit.toLocaleString()}</td>
-                <td>
-                    <button type="button" class="remove-treatment">
-                        <i class="fas fa-trash"></i> Remove
-                    </button>
-                </td>
-            </tr>
-        `;
-        $('#selectedTreatmentsList').append(newRow);
-        updateTotalAmount();
-    }
-
-    // Handle quantity changes
-    $(document).on('input', '.quantity-input', function() {
-        const row = $(this).closest('tr');
-        const quantity = parseInt($(this).val()) || 1;
-        const pricePerUnit = parseInt(row.find('.price-per-unit').text().replace(/[₹,]/g, ''));
+        // Default quantity is 1
+        const quantity = 1;
         const totalPrice = quantity * pricePerUnit;
+
+        // Create treatment object
+        const treatment = {
+            name: treatmentName,
+            quantity: quantity,
+            pricePerUnit: pricePerUnit,
+            totalPrice: totalPrice
+        };
+
+        // Add to treatments array
+        treatments.push(treatment);
         
-        row.find('.total-price').text(`₹${totalPrice.toLocaleString()}`);
-        updateTotalAmount();
+        // Update hidden input with stringified treatments
+        document.querySelector('input[name="treatments"]').value = JSON.stringify(treatments);
+        
+        // Update tables
+        updateTreatmentsTable();
+        updateBillingTable();
+
+        // Reset select
+        select.selectedIndex = 0;
     });
 
-    // Remove treatment row
-    $(document).on('click', '.remove-treatment', function() {
-        $(this).closest('tr').remove();
-        updateTotalAmount();
-    });
+    function updateTreatmentsTable() {
+        const tbody = document.getElementById('selectedTreatmentsList');
+        tbody.innerHTML = treatments.map((treatment, index) => `
+            <tr>
+                <td>${treatment.name}</td>
+                <td><input type="number" value="${treatment.quantity}" min="1" onchange="updateQuantity(${index}, this.value)"></td>
+                <td>₹${treatment.pricePerUnit.toFixed(2)}</td>
+                <td>₹${treatment.totalPrice.toFixed(2)}</td>
+                <td><button type="button" class="remove-btn" onclick="removeTreatment(${index})">Remove</button></td>
+            </tr>
+        `).join('');
+    }
 
-    // Update total amount
-    function updateTotalAmount() {
-        let total = 0;
-        $('.total-price').each(function() {
-            total += parseInt($(this).text().replace(/[₹,]/g, '')) || 0;
-        });
+    function updateBillingTable() {
+        const tbody = document.getElementById('billingList');
+        tbody.innerHTML = treatments.map(treatment => `
+            <tr>
+                <td>${treatment.name}</td>
+                <td>${treatment.quantity}</td>
+                <td>₹${treatment.pricePerUnit.toFixed(2)}</td>
+                <td>₹${treatment.totalPrice.toFixed(2)}</td>
+            </tr>
+        `).join('');
         
-        $('#totalAmount').text(`₹${total.toLocaleString()}`);
+        // Update totals
+        const total = treatments.reduce((sum, t) => sum + t.totalPrice, 0);
+        document.getElementById('totalAmount').textContent = `₹${total.toFixed(2)}`;
         updateNetTotal();
     }
 
-    // Handle discount changes
-    $('#discountType, #discountValue').on('change input', function() {
-        updateNetTotal();
-    });
+    function updateQuantity(index, newQuantity) {
+        treatments[index].quantity = parseInt(newQuantity);
+        treatments[index].totalPrice = treatments[index].quantity * treatments[index].pricePerUnit;
+        
+        // Update hidden input
+        document.querySelector('input[name="treatments"]').value = JSON.stringify(treatments);
+        
+        // Update tables
+        updateTreatmentsTable();
+        updateBillingTable();
+    }
 
-    // Update net total with discount
+    function removeTreatment(index) {
+        treatments.splice(index, 1);
+        
+        // Update hidden input
+        document.querySelector('input[name="treatments"]').value = JSON.stringify(treatments);
+        
+        // Update tables
+        updateTreatmentsTable();
+        updateBillingTable();
+    }
+
     function updateNetTotal() {
-        const totalAmount = parseInt($('#totalAmount').text().replace(/[₹,]/g, '')) || 0;
-        const discountType = $('#discountType').val();
-        const discountValue = parseFloat($('#discountValue').val()) || 0;
-        let netTotal = totalAmount;
-
+        const total = treatments.reduce((sum, t) => sum + t.totalPrice, 0);
+        const discountType = document.getElementById('discountType').value;
+        const discountValue = parseFloat(document.getElementById('discountValue').value) || 0;
+        
+        let netTotal = total;
         if (discountType === 'percentage') {
-            netTotal = totalAmount - (totalAmount * (discountValue / 100));
+            netTotal = total * (1 - discountValue / 100);
         } else {
-            netTotal = totalAmount - discountValue;
+            netTotal = total - discountValue;
         }
-
-        netTotal = Math.max(0, netTotal); // Prevent negative total
-        $('#netTotal').text(`₹${netTotal.toLocaleString()}`);
+        
+        document.getElementById('netTotal').textContent = `₹${netTotal.toFixed(2)}`;
     }
+
+    // Add event listeners for discount changes
+    document.getElementById('discountType').addEventListener('change', updateNetTotal);
+    document.getElementById('discountValue').addEventListener('input', updateNetTotal);
 
     // Add new visit row
     $('.add-visit-row').click(function() {

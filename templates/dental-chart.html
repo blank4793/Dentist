@@ -1,9 +1,35 @@
 <head>
-    <link rel="stylesheet" href="dental_chart.css">
-    </head>
-    <head>
-        <link rel="stylesheet" href="styles.css">
-        </head>
+    <style>
+        /* Include the CSS directly in the file */
+        .tooth-chart {
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+        }
+        
+        .tooth {
+            fill: #fff;
+            stroke: #000;
+            stroke-width: 0.5;
+            cursor: pointer;
+        }
+        
+        .tooth:hover {
+            fill: #e0e0e0;
+        }
+        
+        .tooth.selected {
+            fill: #007bff;
+        }
+        
+        text {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            pointer-events: none;
+        }
+    </style>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
         <div class="tooth-chart">
         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
              viewBox="0 0 450 700" enable-background="new 0 0 450 700" xml:space="preserve">
