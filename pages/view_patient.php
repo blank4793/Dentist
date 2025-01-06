@@ -156,15 +156,51 @@ try {
         }
 
         .medical-item {
-            padding: 6px 12px;
-            font-size: 0.9em;
+            padding: 10px 15px;
+            font-size: 0.95em;
+            background: #fff;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .medical-item::after {
+            content: '✓';
+            color: #27ae60;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-left: 10px;
+        }
+
+        .medical-item .info-label {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .medical-history-grid {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
         }
 
         .medical-item.full-width {
             width: 100%;
-            margin-top: 15px;
-            background-color: #f8f9fa;
+            margin-top: 20px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .medical-item.full-width .info-label {
+            font-size: 1.1em;
+            font-weight: bold;
             color: #2c3e50;
+            margin-bottom: 8px;
+            display: block;
         }
 
         .medical-history-grid p {
@@ -321,6 +357,25 @@ try {
             content: "";
             display: table;
             clear: both;
+        }
+
+        /* Make diagnosis and treatment advised headings more prominent */
+        .dental-info-container .info-label {
+            display: block;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .dental-info-container .info-item {
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
     </style>
 </head>
