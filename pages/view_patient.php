@@ -377,6 +377,163 @@ try {
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+
+        /* Print styles */
+        @media print {
+            /* Reset page layout */
+            @page {
+                size: A4;
+                margin: 20mm;
+            }
+
+            /* Hide unnecessary elements */
+            .dashboard-container > *:not(.main-content),
+            .action-buttons,
+            nav,
+            .sidebar {
+                display: none !important;
+            }
+
+            /* Basic page setup */
+            body {
+                background: white !important;
+                margin: 0 !important;
+                padding: 20mm !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .main-content {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+            }
+
+            /* Header and logo */
+            .header {
+                text-align: center;
+                margin-bottom: 20mm;
+            }
+
+            .header img.logo {
+                width: 100px !important;
+                height: auto !important;
+            }
+
+            .header h1 {
+                font-size: 24pt !important;
+                margin-top: 10mm !important;
+                color: black !important;
+            }
+
+            /* Sections styling */
+            .section {
+                page-break-inside: avoid;
+                margin-bottom: 15mm !important;
+                padding: 5mm !important;
+                border: 1px solid #000 !important;
+                background: white !important;
+                box-shadow: none !important;
+            }
+
+            .section h3 {
+                font-size: 14pt !important;
+                color: black !important;
+                margin-bottom: 5mm !important;
+                border-bottom: 1px solid #000 !important;
+            }
+
+            /* Medical history items */
+            .medical-item {
+                padding: 2mm 4mm !important;
+                margin-bottom: 1mm !important;
+                border: 1px solid #000 !important;
+                background: white !important;
+                display: flex !important;
+                justify-content: space-between !important;
+            }
+
+            .medical-item::after {
+                content: '✓';
+                color: black !important;
+            }
+
+            /* Tables */
+            .treatments-table,
+            .visits-table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                margin: 5mm 0 !important;
+            }
+
+            .treatments-table th,
+            .visits-table th,
+            .treatments-table td,
+            .visits-table td {
+                border: 1px solid #000 !important;
+                padding: 2mm !important;
+                text-align: left !important;
+                color: black !important;
+            }
+
+            /* Dental chart section */
+            .dental-chart-view {
+                width: 45% !important;
+                float: left !important;
+                margin-right: 5% !important;
+            }
+
+            .dental-info-container {
+                width: 45% !important;
+                float: right !important;
+            }
+
+            /* Clear floats */
+            .section::after {
+                content: '';
+                display: table;
+                clear: both;
+            }
+
+            /* Disclaimer section */
+            .disclaimer-section {
+                page-break-inside: avoid;
+                border-top: 2px solid #000 !important;
+                margin-top: 10mm !important;
+                padding: 5mm !important;
+            }
+
+            .signature-line {
+                border-top: 1px solid #000 !important;
+                width: 60mm !important;
+                margin-top: 10mm !important;
+            }
+
+            /* Font settings */
+            * {
+                font-family: Arial, sans-serif !important;
+                line-height: 1.3 !important;
+            }
+
+            /* Ensure proper page breaks */
+            .section {
+                page-break-inside: avoid;
+            }
+
+            /* Force background colors and images to print */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+
+            /* Highlighted teeth in dental chart */
+            .tooth-highlighted {
+                fill: #ffd700 !important;
+                stroke: #ffa500 !important;
+                stroke-width: 2px !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -647,7 +804,7 @@ try {
                             <button class="action-button edit-button" onclick="location.href='edit_patient.php?id=<?php echo $patientId; ?>'">
                                 Edit Patient
                             </button>
-                            <button class="action-button print-button" onclick="window.print()">
+                            <button class="action-button print-button" onclick="printRecord()">
                                 Print Record
                             </button>
                             <button class="action-button save-button" onclick="generatePDF()">
@@ -732,9 +889,10 @@ try {
             let pageNumber = 1;
             addPageNumber(doc, pageNumber);
 
-            // Add logo first if it exists
+            // Add logo and clinic name
             if (logoImg && logoImg.complete) {
                 try {
+                    // Add logo
                     const logoWidth = 100;
                     const logoHeight = 100 * (logoImg.height / logoImg.width);
                     doc.addImage(
@@ -745,10 +903,25 @@ try {
                         logoWidth,
                         logoHeight
                     );
-                    currentY += logoHeight + 20; // Reduced margin after logo
+                    currentY += logoHeight + 10;
+
+                    // Add clinic name
+                    doc.setFontSize(20);
+                    doc.setFont(undefined, 'bold');
+                    const clinicName = "THE DENTAL CLINIC";
+                    const textWidth = doc.getStringUnitWidth(clinicName) * doc.getFontSize();
+                    doc.text(clinicName, (pageWidth - textWidth) / 2, currentY + 20);
+                    
+                    currentY += 40; // Space after clinic name
                 } catch (error) {
                     console.error('Error adding logo:', error);
-                    // Continue without logo if there's an error
+                    // Add clinic name even if logo fails
+                    doc.setFontSize(20);
+                    doc.setFont(undefined, 'bold');
+                    const clinicName = "THE DENTAL CLINIC";
+                    const textWidth = doc.getStringUnitWidth(clinicName) * doc.getFontSize();
+                    doc.text(clinicName, (pageWidth - textWidth) / 2, currentY + 20);
+                    currentY += 40;
                 }
             }
 
@@ -844,6 +1017,142 @@ try {
         }
     `;
     document.head.appendChild(style);
+
+    function printRecord() {
+        // Create an iframe
+        const printFrame = document.createElement('iframe');
+        printFrame.style.position = 'fixed';
+        printFrame.style.right = '0';
+        printFrame.style.bottom = '0';
+        printFrame.style.width = '0';
+        printFrame.style.height = '0';
+        printFrame.style.border = 'none';
+        
+        document.body.appendChild(printFrame);
+        
+        // Get the content to print
+        const printContent = document.querySelector('.patient-details').cloneNode(true);
+        const header = document.querySelector('.header').cloneNode(true);
+        
+        // Create the print document
+        const printDocument = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Patient Record</title>
+                <style>
+                    @media print {
+                        body {
+                            padding: 20mm;
+                            margin: 0;
+                            background: white;
+                        }
+                        .header {
+                            text-align: center;
+                            margin-bottom: 20mm;
+                        }
+                        .header img {
+                            max-width: 100px;
+                            height: auto;
+                        }
+                        .section {
+                            page-break-inside: avoid;
+                            margin-bottom: 10mm;
+                            padding: 10px;
+                            border: 1px solid #ddd;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                        }
+                        th, td {
+                            border: 1px solid black;
+                            padding: 2mm;
+                        }
+                        .action-buttons {
+                            display: none !important;
+                        }
+                        .dental-chart-view {
+                            width: 45%;
+                            float: left;
+                            margin-right: 5%;
+                        }
+                        .dental-info-container {
+                            width: 45%;
+                            float: right;
+                        }
+                        .medical-item {
+                            padding: 8px;
+                            margin-bottom: 5px;
+                            border: 1px solid #ddd;
+                        }
+                        .medical-item::after {
+                            content: '✓';
+                            float: right;
+                        }
+                        @page {
+                            size: A4;
+                            margin: 20mm;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                ${header.outerHTML}
+                ${printContent.outerHTML}
+            </body>
+            </html>
+        `;
+        
+        // Write to iframe and print
+        const frameDoc = printFrame.contentWindow.document;
+        frameDoc.open();
+        frameDoc.write(printDocument);
+        frameDoc.close();
+        
+        // Wait for images to load before printing
+        printFrame.onload = function() {
+            setTimeout(() => {
+                printFrame.contentWindow.print();
+                // Remove the iframe after printing
+                setTimeout(() => {
+                    document.body.removeChild(printFrame);
+                }, 1000);
+            }, 500);
+        };
+    }
+
+    // Function to reattach event listeners
+    function attachEventListeners() {
+        // Reattach print button listener
+        const printButton = document.querySelector('.print-button');
+        if (printButton) {
+            printButton.onclick = printRecord;
+        }
+        
+        // Reattach edit button listener
+        const editButton = document.querySelector('.edit-button');
+        if (editButton) {
+            editButton.onclick = function() {
+                location.href = `edit_patient.php?id=<?php echo $patientId; ?>`;
+            };
+        }
+        
+        // Reattach save PDF button listener
+        const saveButton = document.querySelector('.save-button');
+        if (saveButton) {
+            saveButton.onclick = generatePDF;
+        }
+
+        // Reattach dental chart highlighting
+        const selectedTeeth = <?php echo json_encode($selectedTeethArray); ?>;
+        selectedTeeth.forEach(toothId => {
+            const toothElement = document.querySelector(`#Spots [data-key="${toothId}"]`);
+            if (toothElement) {
+                toothElement.classList.add('tooth-highlighted');
+            }
+        });
+    }
     </script>
 </body>
 </html> 
