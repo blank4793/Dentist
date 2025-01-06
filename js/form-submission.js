@@ -148,10 +148,10 @@ $(document).ready(function() {
 
         // Collect billing data
         const billingData = {
-            totalAmount: parseFloat($('#totalAmount').text().replace(/[₹,]/g, '')) || 0,
+            totalAmount: parseFloat($('#totalAmount').text().replace(/Rs\.|,/g, '')) || 0,
             discountType: $('#discountType').val(),
             discountValue: parseFloat($('#discountValue').val()) || 0,
-            netTotal: parseFloat($('#netTotal').text().replace(/[₹,]/g, '')) || 0
+            netTotal: parseFloat($('#netTotal').text().replace(/Rs\.|,/g, '')) || 0
         };
 
         // Validate discount type
@@ -223,57 +223,28 @@ $(document).ready(function() {
 
         // Submit form with improved error handling
         $.ajax({
-            url: $(this).attr('action'),
+            url: 'save_patient.php',
             type: 'POST',
             data: formData,
             processData: false,
             contentType: false,
             success: function(response) {
-                console.log('Raw Response:', response);
-                try {
-                    // If response contains HTML warnings, extract the JSON part
-                    if (typeof response === 'string' && response.includes('{')) {
-                        response = response.substring(response.lastIndexOf('{'));
-                    }
-                    
-                    // Parse response if it's a string
-                    if (typeof response === 'string') {
-                        response = JSON.parse(response);
-                    }
-                    
-                    if (response.success) {
-                        // Show success message before redirect
-                        alert('Patient added successfully!');
-                        window.location.href = `view_patient.php?id=${response.patientId}`;
-                    } else {
-                        alert('Error: ' + (response.message || 'Unknown error occurred'));
-                    }
-                } catch (e) {
-                    console.error('Error parsing response:', e);
-                    console.error('Raw response:', response);
-                    alert('Error: Server returned invalid response');
+                console.log('Server response:', response);
+                if (response.success) {
+                    alert('Patient added successfully!');
+                    window.location.href = `view_patient.php?id=${response.patientId}`;
+                } else {
+                    alert('Error: ' + (response.message || 'Unknown error occurred'));
+                    console.error('Error details:', response);
                 }
             },
             error: function(xhr, status, error) {
-                console.error('Error details:', {
+                console.error('AJAX Error:', {
                     status: status,
                     error: error,
                     response: xhr.responseText
                 });
-                
-                // Try to extract error message from response if possible
-                try {
-                    const responseText = xhr.responseText;
-                    if (responseText.includes('{')) {
-                        const jsonPart = responseText.substring(responseText.lastIndexOf('{'));
-                        const jsonResponse = JSON.parse(jsonPart);
-                        alert('Error: ' + (jsonResponse.message || error));
-                    } else {
-                        alert('Error submitting form: ' + error);
-                    }
-                } catch (e) {
-                    alert('Error submitting form. Check console for details.');
-                }
+                alert('Error submitting form. Please check console for details.');
             }
         });
     });
@@ -393,27 +364,27 @@ $(document).ready(function() {
 
     // Treatment prices mapping
     const treatmentPrices = {
-        'consultation': 1000,
-        'radiograph': 1500,
-        'fillingD': 3000,
-        'fillingI': 2500,
-        'rct': 15000,
-        'pfmCrownD': 12000,
-        'pfmCrownI': 10000,
-        'zirconia': 20000,
-        'extSimple': 2000,
-        'extComp': 4000,
-        'acrylicDent': 25000,
-        'ccPlate': 8000,
-        'completeDenture': 35000,
-        'flexideDenture': 40000,
-        'bridgeD': 30000,
-        'bridgeI': 25000,
-        'implant': 50000,
-        'laserTeethWhitening': 15000,
-        'postAndCore': 8000,
-        'peadFilling': 2500,
-        'peadExt': 2000
+        'consultation': { name: 'Consultation', price: 1000 },
+        'radiograph': { name: 'Radiograph', price: 1500 },
+        'fillingD': { name: 'Filling Direct', price: 3000 },
+        'fillingI': { name: 'Filling Indirect', price: 2500 },
+        'rct': { name: 'RCT', price: 15000 },
+        'pfmCrownD': { name: 'PFM Crown Direct', price: 12000 },
+        'pfmCrownI': { name: 'PFM Crown Indirect', price: 10000 },
+        'zirconia': { name: 'Zirconia', price: 20000 },
+        'extSimple': { name: 'Extraction Simple', price: 2000 },
+        'extComp': { name: 'Extraction Complex', price: 4000 },
+        'acrylicDent': { name: 'Acrylic Denture', price: 25000 },
+        'ccPlate': { name: 'CC Plate', price: 8000 },
+        'completeDenture': { name: 'Complete Denture', price: 35000 },
+        'flexideDenture': { name: 'Flexide Denture', price: 40000 },
+        'bridgeD': { name: 'Bridge Direct', price: 30000 },
+        'bridgeI': { name: 'Bridge Indirect', price: 25000 },
+        'implant': { name: 'Implant', price: 50000 },
+        'laserTeethWhitening': { name: 'Laser Teeth Whitening', price: 15000 },
+        'postAndCore': { name: 'Post and Core', price: 8000 },
+        'peadFilling': { name: 'Pediatric Filling', price: 2500 },
+        'peadExt': { name: 'Pediatric Extraction', price: 2000 }
     };
 
     // Treatment selection handling
@@ -423,7 +394,7 @@ $(document).ready(function() {
 
         const selectedText = $(this).find('option:selected').text();
         const treatmentName = selectedText.split('(')[0].trim();
-        const price = treatmentPrices[selectedValue];
+        const price = treatmentPrices[selectedValue].price;
 
         // Create new treatment
         const treatment = {
@@ -431,7 +402,8 @@ $(document).ready(function() {
             quantity: 1,
             pricePerUnit: price,
             totalPrice: price,
-            selectedTeeth: $('#selectedTeethInput').val()
+            // Convert to array if it's a comma-separated string
+            selectedTeeth: $('#selectedTeethInput').val().split(',').filter(Boolean)
         };
 
         // Add to treatments array
@@ -458,8 +430,8 @@ $(document).ready(function() {
                         <input type="number" value="${treatment.quantity}" min="1" 
                                onchange="updateQuantity(${index}, this.value)">
                     </td>
-                    <td>₹${treatment.pricePerUnit}</td>
-                    <td>₹${treatment.totalPrice}</td>
+                    <td>Rs. ${treatment.pricePerUnit.toFixed(2)}</td>
+                    <td>Rs. ${treatment.totalPrice.toFixed(2)}</td>
                     <td>
                         <button type="button" onclick="removeTreatment(${index})" class="remove-btn">
                             Remove
@@ -483,20 +455,20 @@ $(document).ready(function() {
                 <tr>
                     <td>${treatment.name}</td>
                     <td>${treatment.quantity}</td>
-                    <td>₹${treatment.pricePerUnit}</td>
-                    <td>₹${treatment.totalPrice}</td>
+                    <td>Rs. ${treatment.pricePerUnit.toFixed(2)}</td>
+                    <td>Rs. ${treatment.totalPrice.toFixed(2)}</td>
                 </tr>
             `);
             tbody.append(row);
         });
 
-        $('#totalAmount').text(`₹${totalAmount}`);
+        $('#totalAmount').text(`Rs. ${totalAmount.toFixed(2)}`);
         calculateNetTotal();
     }
 
     // Calculate net total with discount
     function calculateNetTotal() {
-        const totalAmount = parseInt($('#totalAmount').text().replace(/[₹,]/g, '')) || 0;
+        const totalAmount = parseFloat($('#totalAmount').text().replace(/Rs\.|,/g, '')) || 0;
         const discountType = $('#discountType').val();
         const discountValue = parseFloat($('#discountValue').val()) || 0;
 
@@ -507,7 +479,7 @@ $(document).ready(function() {
             netTotal = totalAmount - discountValue;
         }
 
-        $('#netTotal').text(`₹${Math.max(0, netTotal)}`);
+        $('#netTotal').text(`Rs. ${Math.max(0, netTotal).toFixed(2)}`);
         updateVisitBalances();
     }
 
@@ -533,7 +505,7 @@ $(document).ready(function() {
 
     // Visit Section
     function updateVisitBalances() {
-        const netTotal = parseFloat($('#netTotal').text().replace(/[₹,]/g, '')) || 0;
+        const netTotal = parseFloat($('#netTotal').text().replace(/Rs\.|,/g, '')) || 0;
         let remainingBalance = netTotal;
 
         $('#visitsTableBody tr').each(function() {

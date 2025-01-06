@@ -37,14 +37,19 @@ try {
     $stmt->execute([$patientId]);
     $medicalHistory = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Get dental treatments
+    // Get dental treatments with billing info
     $stmt = $pdo->prepare("
-        SELECT * FROM dental_treatments 
-        WHERE patient_id = ? 
-        ORDER BY created_at DESC
+        SELECT t.*, b.discount_type, b.discount_value 
+        FROM dental_treatments t
+        LEFT JOIN billing b ON b.patient_id = t.patient_id
+        WHERE t.patient_id = ? 
+        ORDER BY t.created_at DESC
     ");
     $stmt->execute([$patientId]);
     $treatments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Debug log
+    error_log("Treatments fetched: " . print_r($treatments, true));
 
     // Get visits
     $stmt = $pdo->prepare("
@@ -54,6 +59,42 @@ try {
     ");
     $stmt->execute([$patientId]);
     $visits = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Get billing information separately
+    $stmt = $pdo->prepare("
+        SELECT * FROM billing 
+        WHERE patient_id = ?
+    ");
+    $stmt->execute([$patientId]);
+    $billing = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Debug log
+    error_log("Billing fetched: " . print_r($billing, true));
+
+    // After fetching treatments and billing
+    if (empty($treatments)) {
+        error_log("Warning: No treatments found for patient ID: $patientId");
+    }
+
+    if (empty($billing)) {
+        error_log("Warning: No billing found for patient ID: $patientId");
+    }
+
+    // Add data validation
+    foreach ($treatments as $treatment) {
+        if (!isset($treatment['treatment_name']) || !isset($treatment['total_price'])) {
+            error_log("Warning: Invalid treatment data found: " . print_r($treatment, true));
+        }
+    }
+
+    if ($billing) {
+        if (!in_array($billing['discount_type'], ['none', 'percentage', 'fixed'])) {
+            error_log("Warning: Invalid discount type in billing: " . $billing['discount_type']);
+        }
+        if (!is_numeric($billing['discount_value'])) {
+            error_log("Warning: Invalid discount value in billing: " . $billing['discount_value']);
+        }
+    }
 
 } catch (Exception $e) {
     $error = $e->getMessage();
@@ -68,6 +109,8 @@ try {
     <title>Patient Details - The Dental Clinic</title>
     <link rel="stylesheet" href="../css/dashboard-styles.css">
     <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         .patient-details {
             padding: 20px;
@@ -200,6 +243,72 @@ try {
             stroke: #ffa500;
             stroke-width: 2px;
         }
+
+        .billing-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .billing-table th,
+        .billing-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .billing-table th {
+            background-color: #f4f6f8;
+            font-weight: 600;
+        }
+
+        .total-row {
+            background-color: #f8f9fa;
+        }
+
+        .discount-row {
+            background-color: #fff3f3;
+        }
+
+        .net-total-row {
+            background-color: #e8f4ff;
+        }
+
+        .discount-row td,
+        .total-row td,
+        .net-total-row td {
+            font-weight: 500;
+        }
+
+        .disclaimer-section {
+            margin-top: 30px;
+            padding: 20px;
+            border-top: 2px solid #ddd;
+        }
+
+        .disclaimer-section h3 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .disclaimer-text {
+            text-align: justify;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #444;
+        }
+
+        .signature-section {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .signature-line {
+            margin-top: 10px;
+            border-top: 1px solid #000;
+            width: 300px;
+        }
     </style>
 </head>
 <body>
@@ -208,6 +317,11 @@ try {
         
         <div class="main-content">
             <div class="container">
+                <div class="header">
+                    <img src="../assets/images/logo.jpeg" alt="Dental Clinic Logo" class="logo">
+                    <h1>THE DENTAL CLINIC</h1>
+                </div>
+
                 <?php if (isset($error)): ?>
                     <div class="error-message"><?php echo $error; ?></div>
                 <?php else: ?>
@@ -342,6 +456,12 @@ try {
                         <!-- Treatments -->
                         <div class="section">
                             <h3>Treatments</h3>
+                            <?php
+                            // Debug output (remove in production)
+                            if (empty($treatments)) {
+                                error_log("No treatments found for patient ID: $patientId");
+                            }
+                            ?>
                             <?php if (!empty($treatments)): ?>
                                 <table class="treatments-table">
                                     <thead>
@@ -351,20 +471,54 @@ try {
                                             <th>Quantity</th>
                                             <th>Price/Unit</th>
                                             <th>Total</th>
-                                            <th>Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php foreach ($treatments as $treatment): ?>
+                                        <?php 
+                                        $totalAmount = 0;
+                                        foreach ($treatments as $treatment): 
+                                            $totalAmount += $treatment['total_price'];
+                                        ?>
                                             <tr>
                                                 <td><?php echo htmlspecialchars($treatment['treatment_name']); ?></td>
                                                 <td><?php echo htmlspecialchars($treatment['tooth_number']); ?></td>
                                                 <td><?php echo htmlspecialchars($treatment['quantity']); ?></td>
-                                                <td>₹<?php echo htmlspecialchars($treatment['price_per_unit']); ?></td>
-                                                <td>₹<?php echo htmlspecialchars($treatment['total_price']); ?></td>
-                                                <td><?php echo htmlspecialchars($treatment['status']); ?></td>
+                                                <td>Rs. <?php echo number_format($treatment['price_per_unit'], 2); ?></td>
+                                                <td>Rs. <?php echo number_format($treatment['total_price'], 2); ?></td>
                                             </tr>
                                         <?php endforeach; ?>
+
+                                        <tr class="total-row">
+                                            <td colspan="4"><strong>Total Amount:</strong></td>
+                                            <td><strong>Rs. <?php echo number_format($totalAmount, 2); ?></strong></td>
+                                        </tr>
+
+                                        <?php if ($billing && $billing['discount_type'] !== 'none' && $billing['discount_value'] > 0): ?>
+                                            <tr class="discount-row">
+                                                <td colspan="4">
+                                                    <strong>Discount (<?php 
+                                                        echo $billing['discount_type'] === 'percentage' 
+                                                            ? htmlspecialchars($billing['discount_value']) . '%' 
+                                                            : '₹' . htmlspecialchars($billing['discount_value']); 
+                                                    ?>):</strong>
+                                                </td>
+                                                <td>
+                                                    <strong>-Rs. <?php 
+                                                        $discountAmount = $billing['discount_type'] === 'percentage'
+                                                            ? ($totalAmount * $billing['discount_value'] / 100)
+                                                            : $billing['discount_value'];
+                                                        echo number_format($discountAmount, 2);
+                                                    ?></strong>
+                                                </td>
+                                            </tr>
+                                            <tr class="net-total-row">
+                                                <td colspan="4"><strong>Net Total:</strong></td>
+                                                <td><strong>Rs. <?php 
+                                                    $netTotal = $totalAmount - $discountAmount;
+                                                    echo number_format($netTotal, 2);
+                                                ?></strong></td>
+                                            </tr>
+                                        <?php endif; ?>
                                     </tbody>
                                 </table>
                             <?php else: ?>
@@ -391,9 +545,9 @@ try {
                                             <tr>
                                                 <td><?php echo htmlspecialchars($visit['visit_date']); ?></td>
                                                 <td><?php echo htmlspecialchars($visit['treatment_done']); ?></td>
-                                                <td>₹<?php echo htmlspecialchars($visit['visit_amount']); ?></td>
+                                                <td>Rs. <?php echo htmlspecialchars($visit['visit_amount']); ?></td>
                                                 <td><?php echo htmlspecialchars($visit['visit_mode']); ?></td>
-                                                <td>₹<?php echo htmlspecialchars($visit['balance']); ?></td>
+                                                <td>Rs. <?php echo htmlspecialchars($visit['balance']); ?></td>
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>
@@ -403,6 +557,23 @@ try {
                             <?php endif; ?>
                         </div>
 
+                        <!-- Add after the visits section -->
+                        <div class="section">
+                            <div class="disclaimer-section">
+                                <h3>PLEASE READ THIS CAREFULLY</h3>
+                                <p class="disclaimer-text" style="font-style: italic;">
+                                    I Affirm that the above information is best to my knowledge. I have not concealed any information regarding 
+                                    my medical history, I am fully aware that correct history is very important for the outcome of my treatment. 
+                                    I also affirm that I have discussed and understood the treatment and cost details. There is no guarantee for 
+                                    any treatment however responsibility of treatment may be for taken by the clinic.
+                                </p>
+                                <div class="signature-section">
+                                    <p><strong>PATIENT SIGNATURE</strong></p>
+                                    <div class="signature-line">____________________________</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Action Buttons -->
                         <div class="action-buttons">
                             <button class="action-button edit-button" onclick="location.href='edit_patient.php?id=<?php echo $patientId; ?>'">
@@ -410,6 +581,9 @@ try {
                             </button>
                             <button class="action-button print-button" onclick="window.print()">
                                 Print Record
+                            </button>
+                            <button class="action-button save-button" onclick="generatePDF()">
+                                Save to PDF
                             </button>
                         </div>
                     </div>
@@ -440,6 +614,165 @@ try {
             tooth.style.pointerEvents = 'none';
         });
     });
+
+    window.jsPDF = window.jspdf.jsPDF;
+
+    function generatePDF() {
+        // Get patient name and date first
+        const patientNameElement = document.querySelector('.info-grid .info-item:first-child span:last-child');
+        const patientName = patientNameElement ? patientNameElement.textContent.trim() : 'patient';
+        const date = new Date().toISOString().split('T')[0];
+
+        const loadingOverlay = document.createElement('div');
+        loadingOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        `;
+        loadingOverlay.innerHTML = '<div style="text-align: center;"><div class="loading-spinner"></div><p>Generating PDF...</p></div>';
+        document.body.appendChild(loadingOverlay);
+
+        // Hide action buttons before capturing
+        const actionButtons = document.querySelector('.action-buttons');
+        actionButtons.style.display = 'none';
+
+        // Create new PDF document
+        const doc = new jsPDF('p', 'pt', 'a4');
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 40;
+
+        // Get the logo
+        const logoImg = document.querySelector('.header img.logo');
+        
+        // Get all sections
+        const sections = document.querySelectorAll('.section');
+        let currentY = 20; // Starting Y position
+
+        // Function to add page number
+        function addPageNumber(doc, pageNumber) {
+            doc.setFontSize(10);
+            doc.text(`Page ${pageNumber}`, pageWidth - 60, pageHeight - 20);
+        }
+
+        // Promise to handle logo addition
+        const addLogo = new Promise((resolve) => {
+            if (logoImg) {
+                const logoWidth = 100;
+                const logoHeight = 100 * (logoImg.height / logoImg.width);
+                doc.addImage(
+                    logoImg.src,
+                    'JPEG',
+                    (pageWidth - logoWidth) / 2,
+                    currentY,
+                    logoWidth,
+                    logoHeight
+                );
+                currentY += logoHeight + margin;
+            }
+            resolve();
+        });
+
+        // Process each section
+        addLogo.then(() => {
+            let pageNumber = 1;
+            addPageNumber(doc, pageNumber);
+
+            // Convert sections to array for easier processing
+            const sectionsArray = Array.from(sections);
+            
+            const processSection = (index) => {
+                if (index >= sectionsArray.length) {
+                    // All sections processed, save the PDF
+                    const filename = `${patientName}_dental_record_${date}.pdf`;
+                    doc.save(filename);
+                    actionButtons.style.display = 'flex';
+                    document.body.removeChild(loadingOverlay);
+                    return;
+                }
+
+                const section = sectionsArray[index];
+                html2canvas(section, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    allowTaint: true
+                }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const imgProps = doc.getImageProperties(imgData);
+                    const imgWidth = pageWidth - (margin * 2);
+                    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+                    // Check if we need a new page
+                    if (currentY + imgHeight > pageHeight - margin) {
+                        doc.addPage();
+                        currentY = margin;
+                        pageNumber++;
+                        addPageNumber(doc, pageNumber);
+                    }
+
+                    // Add section title
+                    const sectionTitle = section.querySelector('h3').textContent;
+                    doc.setFontSize(14);
+                    doc.setFont(undefined, 'bold');
+                    doc.text(sectionTitle, margin, currentY + 15);
+                    currentY += 30;
+
+                    // Add section content
+                    doc.addImage(imgData, 'PNG', margin, currentY, imgWidth, imgHeight);
+                    currentY += imgHeight + margin;
+
+                    // Process next section
+                    processSection(index + 1);
+                });
+            };
+
+            // Start processing sections
+            processSection(0);
+        }).catch(error => {
+            console.error('Error generating PDF:', error);
+            actionButtons.style.display = 'flex';
+            document.body.removeChild(loadingOverlay);
+            alert('Error generating PDF. Please try again.');
+        });
+    }
+
+    // Add loading spinner styles
+    const style = document.createElement('style');
+    style.textContent = `
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin: 20px auto;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .save-button {
+            background-color: #9b59b6;
+        }
+
+        @media print {
+            .action-buttons {
+                display: none !important;
+            }
+        }
+    `;
+    document.head.appendChild(style);
     </script>
 </body>
 </html> 

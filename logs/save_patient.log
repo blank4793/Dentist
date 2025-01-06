@@ -1,0 +1,145 @@
+2025-01-06 23:51:08 - Starting patient save process
+2025-01-06 23:51:08 - Received data:
+Data: Array
+(
+    [patientData] => Array
+        (
+            [name] => test
+            [date] => 2025-01-07
+            [sector] => dasdas
+            [streetNo] => dasdasd
+            [houseNo] => dasdasd
+            [nonIslamabadAddress] => dasdasd
+            [phone] => 03461571792
+            [age] => 30
+            [gender] => Male
+            [occupation] => dsadasd
+            [email] => wassiabbad@gmail.com
+        )
+
+    [treatments] => Array
+        (
+            [0] => Array
+                (
+                    [name] => Bridge Direct
+                    [quantity] => 2
+                    [pricePerUnit] => 30000
+                    [totalPrice] => 60000
+                    [selectedTeeth] => 14,13,11
+                )
+
+        )
+
+    [billing] => Array
+        (
+            [totalAmount] => 60000
+            [discountType] => percentage
+            [discountValue] => 30
+            [netTotal] => 42000
+        )
+
+)
+
+2025-01-06 23:53:44 - Starting patient save process
+2025-01-06 23:53:44 - Received data:
+Data: Array
+(
+    [patientData] => Array
+        (
+            [name] => test
+            [date] => 2025-01-07
+            [sector] => dsadas
+            [streetNo] => dasdasd
+            [houseNo] => dsadas
+            [nonIslamabadAddress] => dasdassd
+            [phone] => 03461571792
+            [age] => 30
+            [gender] => Male
+            [occupation] => dasdasd
+            [email] => wassiabbad@gmail.com
+        )
+
+    [treatments] => Array
+        (
+            [0] => Array
+                (
+                    [name] => Complete Denture
+                    [quantity] => 2
+                    [pricePerUnit] => 35000
+                    [totalPrice] => 70000
+                    [selectedTeeth] => Array
+                        (
+                            [0] => 13
+                            [1] => 16
+                        )
+
+                )
+
+        )
+
+    [billing] => Array
+        (
+            [totalAmount] => 70000
+            [discountType] => percentage
+            [discountValue] => 30
+            [netTotal] => 49000
+        )
+
+)
+
+2025-01-06 23:53:44 - Processing treatments:
+Data: Array
+(
+    [treatments] => Array
+        (
+            [0] => Array
+                (
+                    [name] => Complete Denture
+                    [quantity] => 2
+                    [pricePerUnit] => 35000
+                    [totalPrice] => 70000
+                    [selectedTeeth] => Array
+                        (
+                            [0] => 13
+                            [1] => 16
+                        )
+
+                )
+
+        )
+
+    [first_treatment_teeth] => Array
+        (
+            [0] => 13
+            [1] => 16
+        )
+
+    [teeth_type] => array
+)
+
+2025-01-06 23:53:44 - Processing treatment 1
+Data: Array
+(
+    [treatment] => Array
+        (
+            [name] => Complete Denture
+            [quantity] => 2
+            [pricePerUnit] => 35000
+            [totalPrice] => 70000
+            [selectedTeeth] => Array
+                (
+                    [0] => 13
+                    [1] => 16
+                )
+
+        )
+
+    [selectedTeeth] => Array
+        (
+            [0] => 13
+            [1] => 16
+        )
+
+    [selectedTeeth_type] => array
+)
+

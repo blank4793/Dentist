@@ -65,14 +65,13 @@ $recentPatients = $stmt->fetchAll();
 
             <div class="recent-patients">
                 <h2>Recent Patients</h2>
-                <table>
+                <table class="patient-table">
                     <thead>
                         <tr>
                             <th>Name</th>
                             <th>Date</th>
-                            <th>Treatment</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>Phone</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -80,11 +79,11 @@ $recentPatients = $stmt->fetchAll();
                         <tr>
                             <td><?php echo htmlspecialchars($patient['name']); ?></td>
                             <td><?php echo htmlspecialchars($patient['date']); ?></td>
-                            <td><?php echo htmlspecialchars($patient['treatment_name'] ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars($patient['status'] ?? 'pending'); ?></td>
-                            <td>
-                                <a href="edit_patient.php?id=<?php echo $patient['id']; ?>" class="btn-edit">Edit</a>
-                                <a href="view_patient.php?id=<?php echo $patient['id']; ?>" class="btn-view">View</a>
+                            <td><?php echo htmlspecialchars($patient['phone']); ?></td>
+                            <td class="actions">
+                                <a href="view_patient.php?id=<?php echo $patient['id']; ?>" class="view-btn">View</a>
+                                <a href="edit_patient.php?id=<?php echo $patient['id']; ?>" class="edit-btn">Edit</a>
+                                <button class="delete-btn" onclick="deletePatient(<?php echo $patient['id']; ?>)">Delete</button>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -95,4 +94,5 @@ $recentPatients = $stmt->fetchAll();
     </div>
 
     <script src="../js/script.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script> 
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="../js/dashboard.js"></script> 

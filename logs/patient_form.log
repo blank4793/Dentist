@@ -1,0 +1,396 @@
+2025-01-06 22:13:17 - Starting patient registration process
+2025-01-06 22:13:17 - Received form data:
+Data: Array
+(
+    [patientData] => Array
+        (
+            [name] => test
+            [date] => 2025-01-07
+            [age] => 30
+            [gender] => Male
+            [sector] => fsdfs
+            [streetNo] => fsdfs
+            [houseNo] => fsdfs
+            [nonIslamabadAddress] => fsdfsd
+            [phone] => 03461571792
+            [email] => wassiabbad@gmail.com
+            [occupation] => fsdfsd
+        )
+
+    [medicalHistory] => Array
+        (
+            [heartProblem] => 1
+            [bloodPressure] => 
+            [bleedingDisorder] => 1
+            [bloodThinners] => 
+            [hepatitis] => 
+            [diabetes] => 
+            [faintingSpells] => 
+            [allergyAnesthesia] => 
+            [malignancy] => 
+            [previousSurgery] => 
+            [epilepsy] => 
+            [asthma] => 1
+            [pregnant] => 
+            [phobia] => 
+            [stomach] => 
+            [allergy] => 
+            [drugAllergy] => 
+            [smoker] => 
+            [alcoholic] => 
+        )
+
+    [treatments] => Array
+        (
+            [0] => Array
+                (
+                    [name] => Implant
+                    [quantity] => 2
+                    [pricePerUnit] => 50000
+                    [totalPrice] => 100000
+                    [selectedTeeth] => 14,13,12
+                )
+
+        )
+
+    [visits] => Array
+        (
+            [0] => Array
+                (
+                    [amount] => 50000
+                    [balance] => 40000.00
+                    [date] => 2025-01-07
+                    [treatment] => fsdfsdfd
+                    [mode] => cash
+                )
+
+        )
+
+    [billing] => Array
+        (
+            [totalAmount] => 100000
+            [discountType] => percentage
+            [discountValue] => 10
+            [netTotal] => 90000
+        )
+
+    [selectedTeeth] => 14,13,12
+)
+
+2025-01-06 22:13:17 - Starting database transaction
+2025-01-06 22:13:17 - All required tables exist
+2025-01-06 22:13:17 - Inserting patient data
+2025-01-06 22:13:17 - Patient values:
+Data: Array
+(
+    [name] => test
+    [date] => 2025-01-07
+    [sector] => fsdfs
+    [street_no] => fsdfs
+    [house_no] => fsdfs
+    [non_islamabad_address] => fsdfsd
+    [phone] => 03461571792
+    [age] => 30
+    [gender] => Male
+    [occupation] => fsdfsd
+    [email] => wassiabbad@gmail.com
+    [diagnosis] => fsdfsdf
+    [treatment_advised] => fsdfsdf
+    [selected_teeth] => 14,13,12
+)
+
+2025-01-06 22:13:17 - Patient inserted with ID: 13
+2025-01-06 22:13:17 - Inserting medical history
+2025-01-06 22:13:17 - Medical history values:
+Data: Array
+(
+    [patient_id] => 13
+    [heart_problem] => 1
+    [blood_pressure] => 
+    [bleeding_disorder] => 1
+    [blood_thinners] => 
+    [hepatitis] => 
+    [diabetes] => 
+    [fainting_spells] => 
+    [allergy_anesthesia] => 
+    [malignancy] => 
+    [previous_surgery] => 
+    [epilepsy] => 
+    [asthma] => 1
+    [pregnant] => 
+    [phobia] => 
+    [stomach] => 
+    [allergy] => 
+    [drug_allergy] => 
+    [smoker] => 
+    [alcoholic] => 
+    [other_conditions] => 
+)
+
+2025-01-06 22:13:17 - Inserting treatments:
+Data: Array
+(
+    [0] => Array
+        (
+            [name] => Implant
+            [quantity] => 2
+            [pricePerUnit] => 50000
+            [totalPrice] => 100000
+            [selectedTeeth] => 14,13,12
+        )
+
+)
+
+2025-01-06 22:13:17 - Inserting visits:
+Data: Array
+(
+    [0] => Array
+        (
+            [amount] => 50000
+            [balance] => 40000.00
+            [date] => 2025-01-07
+            [treatment] => fsdfsdfd
+            [mode] => cash
+        )
+
+)
+
+2025-01-06 22:13:17 - Inserting visit 1
+Data: Array
+(
+    [patient_id] => 13
+    [visit_date] => 2025-01-07
+    [treatment_done] => fsdfsdfd
+    [visit_amount] => 50000
+    [visit_mode] => cash
+    [balance] => 40000.00
+)
+
+2025-01-06 22:13:17 - Committing transaction
+2025-01-06 22:13:17 - Success response:
+Data: Array
+(
+    [success] => 1
+    [patientId] => 13
+    [message] => Patient added successfully
+)
+
+2025-01-06 22:20:46 - Starting patient registration process
+2025-01-06 23:16:25 - Starting patient registration process
+2025-01-06 23:28:13 - Starting patient registration process
+2025-01-06 23:41:55 - Starting patient registration process
+2025-01-06 23:41:55 - Received treatments data:
+Data: Array
+(
+    [0] => Array
+        (
+            [name] => Laser Teeth Whitening
+            [quantity] => 2
+            [pricePerUnit] => 15000
+            [totalPrice] => 30000
+            [selectedTeeth] => 17,26,38
+        )
+
+)
+
+2025-01-06 23:41:55 - Received billing data:
+Data: Array
+(
+    [totalAmount] => 30000
+    [discountType] => percentage
+    [discountValue] => 10
+    [netTotal] => 27000
+)
+
+2025-01-06 23:41:59 - Starting patient registration process
+2025-01-06 23:41:59 - Received treatments data:
+Data: Array
+(
+    [0] => Array
+        (
+            [name] => Laser Teeth Whitening
+            [quantity] => 2
+            [pricePerUnit] => 15000
+            [totalPrice] => 30000
+            [selectedTeeth] => 17,26,38
+        )
+
+)
+
+2025-01-06 23:41:59 - Received billing data:
+Data: Array
+(
+    [totalAmount] => 30000
+    [discountType] => percentage
+    [discountValue] => 10
+    [netTotal] => 27000
+)
+
+2025-01-06 23:42:00 - Starting patient registration process
+2025-01-06 23:42:00 - Received treatments data:
+Data: Array
+(
+    [0] => Array
+        (
+            [name] => Laser Teeth Whitening
+            [quantity] => 2
+            [pricePerUnit] => 15000
+            [totalPrice] => 30000
+            [selectedTeeth] => 17,26,38
+        )
+
+)
+
+2025-01-06 23:42:00 - Received billing data:
+Data: Array
+(
+    [totalAmount] => 30000
+    [discountType] => percentage
+    [discountValue] => 10
+    [netTotal] => 27000
+)
+
+2025-01-06 23:42:01 - Starting patient registration process
+2025-01-06 23:42:01 - Received treatments data:
+Data: Array
+(
+    [0] => Array
+        (
+            [name] => Laser Teeth Whitening
+            [quantity] => 2
+            [pricePerUnit] => 15000
+            [totalPrice] => 30000
+            [selectedTeeth] => 17,26,38
+        )
+
+)
+
+2025-01-06 23:42:01 - Received billing data:
+Data: Array
+(
+    [totalAmount] => 30000
+    [discountType] => percentage
+    [discountValue] => 10
+    [netTotal] => 27000
+)
+
+2025-01-06 23:42:01 - Starting patient registration process
+2025-01-06 23:42:01 - Received treatments data:
+Data: Array
+(
+    [0] => Array
+        (
+            [name] => Laser Teeth Whitening
+            [quantity] => 2
+            [pricePerUnit] => 15000
+            [totalPrice] => 30000
+            [selectedTeeth] => 17,26,38
+        )
+
+)
+
+2025-01-06 23:42:01 - Received billing data:
+Data: Array
+(
+    [totalAmount] => 30000
+    [discountType] => percentage
+    [discountValue] => 10
+    [netTotal] => 27000
+)
+
+2025-01-06 23:42:01 - Starting patient registration process
+2025-01-06 23:42:01 - Received treatments data:
+Data: Array
+(
+    [0] => Array
+        (
+            [name] => Laser Teeth Whitening
+            [quantity] => 2
+            [pricePerUnit] => 15000
+            [totalPrice] => 30000
+            [selectedTeeth] => 17,26,38
+        )
+
+)
+
+2025-01-06 23:42:01 - Received billing data:
+Data: Array
+(
+    [totalAmount] => 30000
+    [discountType] => percentage
+    [discountValue] => 10
+    [netTotal] => 27000
+)
+
+2025-01-06 23:42:12 - Starting patient registration process
+2025-01-06 23:42:12 - Received treatments data:
+Data: Array
+(
+    [0] => Array
+        (
+            [name] => Laser Teeth Whitening
+            [quantity] => 2
+            [pricePerUnit] => 15000
+            [totalPrice] => 30000
+            [selectedTeeth] => 17,26,38
+        )
+
+)
+
+2025-01-06 23:42:12 - Received billing data:
+Data: Array
+(
+    [totalAmount] => 30000
+    [discountType] => percentage
+    [discountValue] => 10
+    [netTotal] => 27000
+)
+
+2025-01-06 23:44:19 - Starting patient registration process
+2025-01-06 23:44:19 - Received treatments data:
+Data: Array
+(
+    [0] => Array
+        (
+            [name] => RCT
+            [quantity] => 2
+            [pricePerUnit] => 15000
+            [totalPrice] => 30000
+            [selectedTeeth] => 11,15
+        )
+
+)
+
+2025-01-06 23:44:19 - Received billing data:
+Data: Array
+(
+    [totalAmount] => 30000
+    [discountType] => percentage
+    [discountValue] => 15
+    [netTotal] => 25500
+)
+
+2025-01-06 23:47:44 - Starting patient registration process
+2025-01-06 23:47:44 - Received treatments data:
+Data: Array
+(
+    [0] => Array
+        (
+            [name] => Bridge Indirect
+            [quantity] => 2
+            [pricePerUnit] => 25000
+            [totalPrice] => 50000
+            [selectedTeeth] => 14,23,36
+        )
+
+)
+
+2025-01-06 23:47:44 - Received billing data:
+Data: Array
+(
+    [totalAmount] => 50000
+    [discountType] => percentage
+    [discountValue] => 35
+    [netTotal] => 32500
+)
+

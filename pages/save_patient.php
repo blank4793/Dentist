@@ -1,13 +1,10 @@
 <?php
-// Prevent any output before JSON response
+// At the very top of the file
 ob_start();
-
-// Disable error display in output
-ini_set('display_errors', 0);
+header('Content-Type: application/json');
+ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// Set JSON header
-header('Content-Type: application/json');
 session_start();
 require_once '../includes/config.php';
 
@@ -17,18 +14,12 @@ function debug_log($message, $data = null) {
     if ($data !== null) {
         $log .= "\nData: " . print_r($data, true);
     }
-    
-    $logFile = __DIR__ . "/../logs/patient_form.log";
-    
-    // Try to write to file, fallback to error_log if fails
-    if (!error_log($log . "\n", 3, $logFile)) {
-        error_log($log); // Write to PHP's error log instead
-    }
+    error_log($log . "\n", 3, __DIR__ . "/../logs/save_patient.log");
 }
 
 try {
-    debug_log("Starting patient registration process");
-
+    debug_log("Starting patient save process");
+    
     // Validate session
     if (!isset($_SESSION['user_id'])) {
         throw new Exception('User not logged in');
@@ -41,11 +32,21 @@ try {
 
     // Get POST data
     $patientData = json_decode($_POST['patientData'], true);
+    if (!$patientData) {
+        throw new Exception('Invalid patient data format');
+    }
+
     $medicalHistory = json_decode($_POST['medicalHistory'], true);
     $treatments = json_decode($_POST['treatments'], true);
     $visits = json_decode($_POST['visits'], true);
     $billing = json_decode($_POST['billing'], true);
-    $selectedTeeth = $_POST['selectedTeeth'];
+    $selectedTeeth = $_POST['selectedTeeth'] ?? '';
+
+    debug_log("Received data:", [
+        'patientData' => $patientData,
+        'treatments' => $treatments,
+        'billing' => $billing
+    ]);
 
     // Start transaction
     $pdo->beginTransaction();
@@ -130,34 +131,65 @@ try {
 
         // 3. Insert dental treatments
         if (!empty($treatments)) {
+            debug_log("Processing treatments:", [
+                'treatments' => $treatments,
+                'first_treatment_teeth' => $treatments[0]['selectedTeeth'] ?? null,
+                'teeth_type' => gettype($treatments[0]['selectedTeeth'] ?? null)
+            ]);
+
             $stmt = $pdo->prepare("
                 INSERT INTO dental_treatments (
                     patient_id, tooth_number, treatment_name,
                     quantity, price_per_unit, total_price,
-                    discount_type, discount_value, net_total,
                     status
                 ) VALUES (
                     :patient_id, :tooth_number, :treatment_name,
                     :quantity, :price_per_unit, :total_price,
-                    :discount_type, :discount_value, :net_total,
                     'planned'
                 )
             ");
 
-            foreach ($treatments as $treatment) {
+            foreach ($treatments as $index => $treatment) {
+                debug_log("Processing treatment " . ($index + 1), [
+                    'treatment' => $treatment,
+                    'selectedTeeth' => $treatment['selectedTeeth'],
+                    'selectedTeeth_type' => gettype($treatment['selectedTeeth'])
+                ]);
+                
+                // Check if selectedTeeth is already a string
+                $toothNumbers = is_array($treatment['selectedTeeth']) 
+                    ? implode(',', $treatment['selectedTeeth']) 
+                    : $treatment['selectedTeeth'];
+
                 $stmt->execute([
                     'patient_id' => $patientId,
-                    'tooth_number' => $treatment['selectedTeeth'],
+                    'tooth_number' => $toothNumbers,
                     'treatment_name' => $treatment['name'],
                     'quantity' => $treatment['quantity'],
                     'price_per_unit' => $treatment['pricePerUnit'],
-                    'total_price' => $treatment['totalPrice'],
-                    'discount_type' => $billing['discountType'],
-                    'discount_value' => $billing['discountValue'],
-                    'net_total' => $billing['netTotal']
+                    'total_price' => $treatment['totalPrice']
                 ]);
             }
         }
+
+        // Insert billing information
+        $stmt = $pdo->prepare("
+            INSERT INTO billing (
+                patient_id, 
+                discount_type, 
+                discount_value
+            ) VALUES (
+                :patient_id,
+                :discount_type,
+                :discount_value
+            )
+        ");
+
+        $stmt->execute([
+            'patient_id' => $patientId,
+            'discount_type' => $billing['discountType'],
+            'discount_value' => floatval($billing['discountValue'])
+        ]);
 
         // 4. Insert visits
         if (!empty($visits)) {
@@ -187,11 +219,7 @@ try {
 
         // Commit transaction
         $pdo->commit();
-
-        // Clear any buffered output
         ob_clean();
-        
-        // Send success response
         echo json_encode([
             'success' => true,
             'patientId' => $patientId,
@@ -200,16 +228,19 @@ try {
 
     } catch (Exception $e) {
         $pdo->rollBack();
-        throw $e;
+        debug_log("Database error: " . $e->getMessage());
+        debug_log("Stack trace: " . $e->getTraceAsString());
+        throw new Exception('Database error: ' . $e->getMessage());
     }
 
 } catch (Exception $e) {
-    // Clear any buffered output
     ob_clean();
+    debug_log("Error: " . $e->getMessage());
+    debug_log("Stack trace: " . $e->getTraceAsString());
     
-    // Send error response
     echo json_encode([
         'success' => false,
-        'message' => 'Error: ' . $e->getMessage()
+        'message' => $e->getMessage(),
+        'details' => $e->getTraceAsString()
     ]);
 } 

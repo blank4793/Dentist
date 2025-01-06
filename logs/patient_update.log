@@ -1,0 +1,358 @@
+2025-01-06 23:17:15 - Updating patient ID: 15
+2025-01-06 23:17:15 - Received billing data:
+Data: Array
+(
+    [discountType] => percentage
+    [discountValue] => 15
+)
+
+2025-01-06 23:17:15 - Executing billing update with params:
+Data: Array
+(
+    [patient_id] => 15
+    [discount_type] => percentage
+    [discount_value] => 15
+)
+
+2025-01-06 23:17:15 - Update completed successfully
+2025-01-06 23:28:45 - Updating patient ID: 16
+2025-01-06 23:28:45 - Received data:
+Data: Array
+(
+    [patientData] => Array
+        (
+            [name] => test
+            [date] => 2025-01-07
+            [sector] => fdsfsd
+            [streetNo] => fsdfsd
+            [houseNo] => fsdfsd
+            [nonIslamabadAddress] => fsdfsd
+            [phone] => 03461571792
+            [age] => 30
+            [gender] => Male
+            [occupation] => fsdfds
+            [email] => wassiabbad@gmail.com
+            [diagnosis] => fsdfsdfd
+            [treatmentAdvised] => fsdfsdfsdf
+            [selectedTeeth] => 12,18
+        )
+
+    [medicalHistory] => Array
+        (
+            [heartProblem] => 1
+            [bloodPressure] => 
+            [bleedingDisorder] => 
+            [bloodThinners] => 
+            [hepatitis] => 
+            [diabetes] => 
+            [faintingSpells] => 
+            [allergyAnesthesia] => 
+            [malignancy] => 
+            [previousSurgery] => 
+            [epilepsy] => 
+            [asthma] => 1
+            [pregnant] => 
+            [phobia] => 
+            [stomach] => 
+            [allergy] => 
+            [drugAllergy] => 
+            [smoker] => 
+            [alcoholic] => 
+        )
+
+    [treatments] => Array
+        (
+            [0] => Array
+                (
+                    [name] => Bridge Direct
+                    [quantity] => 2
+                    [pricePerUnit] => 30000
+                    [totalPrice] => 60000
+                    [selectedTeeth] => Array
+                        (
+                            [0] => 12
+                            [1] => 18
+                        )
+
+                )
+
+        )
+
+    [visits] => Array
+        (
+            [0] => Array
+                (
+                    [date] => 2025-01-07
+                    [treatment] => fsdfsdf
+                    [amount] => 5000.00
+                    [mode] => cash
+                    [balance] => 49000
+                )
+
+            [1] => Array
+                (
+                    [date] => 
+                    [treatment] => gfgdfgdfg
+                    [amount] => 10000
+                    [mode] => cash
+                    [balance] => 39000
+                )
+
+        )
+
+    [billing] => Array
+        (
+            [discountType] => percentage
+            [discountValue] => 10
+            [netTotal] => 54000
+        )
+
+)
+
+2025-01-06 23:28:45 - Executing billing update with params:
+Data: Array
+(
+    [patient_id] => 16
+    [discount_type] => percentage
+    [discount_value] => 10
+)
+
+2025-01-06 23:28:45 - Update completed successfully
+2025-01-06 23:54:30 - Updating patient ID: 3
+2025-01-06 23:54:30 - Received data:
+Data: Array
+(
+    [patientData] => Array
+        (
+            [name] => test
+            [date] => 2025-01-07
+            [sector] => dsadas
+            [streetNo] => dasdasd
+            [houseNo] => dsadas
+            [nonIslamabadAddress] => dasdassd
+            [phone] => 03461571792
+            [age] => 30
+            [gender] => Male
+            [occupation] => dasdasd
+            [email] => wassiabbad@gmail.com
+            [diagnosis] => dasdasdccvc
+            [treatmentAdvised] => vcvcvcfsdfsdf
+            [selectedTeeth] => 13,16
+        )
+
+    [medicalHistory] => Array
+        (
+            [heartProblem] => 1
+            [bloodPressure] => 
+            [bleedingDisorder] => 1
+            [bloodThinners] => 1
+            [hepatitis] => 
+            [diabetes] => 
+            [faintingSpells] => 
+            [allergyAnesthesia] => 
+            [malignancy] => 
+            [previousSurgery] => 
+            [epilepsy] => 
+            [asthma] => 
+            [pregnant] => 
+            [phobia] => 
+            [stomach] => 
+            [allergy] => 
+            [drugAllergy] => 
+            [smoker] => 
+            [alcoholic] => 
+        )
+
+    [treatments] => Array
+        (
+            [0] => Array
+                (
+                    [name] => Complete Denture
+                    [quantity] => 2
+                    [pricePerUnit] => 35000
+                    [totalPrice] => 70000
+                    [selectedTeeth] => Array
+                        (
+                            [0] => 13
+                            [1] => 16
+                        )
+
+                )
+
+        )
+
+    [visits] => Array
+        (
+            [0] => Array
+                (
+                    [date] => 2025-01-07
+                    [treatment] => fsdfsdfd
+                    [amount] => 5000.00
+                    [mode] => cash
+                    [balance] => 44000
+                )
+
+            [1] => Array
+                (
+                    [date] => 2025-01-08
+                    [treatment] => fsdfsdfd
+                    [amount] => 6000
+                    [mode] => cash
+                    [balance] => 38000
+                )
+
+        )
+
+    [billing] => Array
+        (
+            [discountType] => percentage
+            [discountValue] => 30
+            [netTotal] => 49000
+        )
+
+)
+
+2025-01-06 23:56:29 - Updating patient ID: 3
+2025-01-06 23:56:29 - Received data:
+Data: Array
+(
+    [patientData] => Array
+        (
+            [name] => test
+            [date] => 2025-01-07
+            [sector] => dsadas
+            [streetNo] => dasdasd
+            [houseNo] => dsadas
+            [nonIslamabadAddress] => dasdassd
+            [phone] => 03461571792
+            [age] => 30
+            [gender] => Male
+            [occupation] => dasdasd
+            [email] => wassiabbad@gmail.com
+            [diagnosis] => dasdasdccvc
+            [treatmentAdvised] => vcvcvcfsdfsdf
+            [selectedTeeth] => 13,16
+        )
+
+    [medicalHistory] => Array
+        (
+            [heartProblem] => 1
+            [bloodPressure] => 
+            [bleedingDisorder] => 1
+            [bloodThinners] => 1
+            [hepatitis] => 
+            [diabetes] => 
+            [faintingSpells] => 
+            [allergyAnesthesia] => 
+            [malignancy] => 
+            [previousSurgery] => 
+            [epilepsy] => 
+            [asthma] => 
+            [pregnant] => 
+            [phobia] => 
+            [stomach] => 
+            [allergy] => 
+            [drugAllergy] => 
+            [smoker] => 
+            [alcoholic] => 
+        )
+
+    [treatments] => Array
+        (
+            [0] => Array
+                (
+                    [name] => Complete Denture
+                    [quantity] => 2
+                    [pricePerUnit] => 35000
+                    [totalPrice] => 70000
+                    [selectedTeeth] => Array
+                        (
+                            [0] => 13
+                            [1] => 16
+                        )
+
+                )
+
+        )
+
+    [billing] => Array
+        (
+            [discountType] => percentage
+            [discountValue] => 30
+            [netTotal] => 49000
+        )
+
+)
+
+2025-01-06 23:58:37 - Updating patient ID: 3
+2025-01-06 23:58:37 - Received data:
+Data: Array
+(
+    [patientData] => Array
+        (
+            [name] => test
+            [date] => 2025-01-07
+            [sector] => dsadas
+            [streetNo] => dasdasd
+            [houseNo] => dsadas
+            [nonIslamabadAddress] => dasdassd
+            [phone] => 03461571792
+            [age] => 30
+            [gender] => Male
+            [occupation] => dasdasd
+            [email] => wassiabbad@gmail.com
+            [diagnosis] => dasdasdccvc
+            [treatmentAdvised] => vcvcvcfsdfsdf
+            [selectedTeeth] => 13,16
+        )
+
+    [medicalHistory] => Array
+        (
+            [heartProblem] => 1
+            [bloodPressure] => 
+            [bleedingDisorder] => 1
+            [bloodThinners] => 1
+            [hepatitis] => 
+            [diabetes] => 
+            [faintingSpells] => 
+            [allergyAnesthesia] => 
+            [malignancy] => 
+            [previousSurgery] => 
+            [epilepsy] => 
+            [asthma] => 
+            [pregnant] => 
+            [phobia] => 
+            [stomach] => 
+            [allergy] => 
+            [drugAllergy] => 
+            [smoker] => 
+            [alcoholic] => 
+        )
+
+    [treatments] => Array
+        (
+            [0] => Array
+                (
+                    [name] => Complete Denture
+                    [quantity] => 2
+                    [pricePerUnit] => 35000
+                    [totalPrice] => 70000
+                    [selectedTeeth] => Array
+                        (
+                            [0] => 13
+                            [1] => 16
+                        )
+
+                )
+
+        )
+
+    [billing] => Array
+        (
+            [discountType] => percentage
+            [discountValue] => 30
+            [netTotal] => 49000
+        )
+
+)
+

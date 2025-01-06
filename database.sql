@@ -1,20 +1,14 @@
 -- First force close all connections to the database
-SELECT concat('KILL ',id,';') 
-FROM INFORMATION_SCHEMA.PROCESSLIST 
-WHERE db = 'dental_clinic' 
-AND id != CONNECTION_ID();
-
--- Force drop all tables first
 SET FOREIGN_KEY_CHECKS = 0;
-DROP TABLE IF EXISTS users, patients, medical_history, dental_treatments, visits;
+DROP TABLE IF EXISTS visits;
+DROP TABLE IF EXISTS dental_treatments;
+DROP TABLE IF EXISTS billing;
+DROP TABLE IF EXISTS medical_history;
+DROP TABLE IF EXISTS patients;
+DROP TABLE IF EXISTS users;
 SET FOREIGN_KEY_CHECKS = 1;
 
--- Now recreate the database
-DROP DATABASE IF EXISTS dental_clinic;
-CREATE DATABASE dental_clinic;
-USE dental_clinic;
-
--- Users table
+-- Create tables in correct order
 CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) UNIQUE NOT NULL,
@@ -24,7 +18,6 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Patients table
 CREATE TABLE patients (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
@@ -41,12 +34,9 @@ CREATE TABLE patients (
     diagnosis TEXT NULL,
     treatment_advised TEXT NULL,
     selected_teeth TEXT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_name (name),
-    INDEX idx_phone (phone)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Medical history table
 CREATE TABLE medical_history (
     id INT PRIMARY KEY AUTO_INCREMENT,
     patient_id INT NOT NULL,
@@ -74,25 +64,29 @@ CREATE TABLE medical_history (
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
 );
 
--- Dental treatments table (includes billing info)
+CREATE TABLE billing (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_id INT NOT NULL,
+    discount_type ENUM('none', 'percentage', 'fixed') DEFAULT 'none',
+    discount_value DECIMAL(10,2) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_patient (patient_id)
+);
+
 CREATE TABLE dental_treatments (
     id INT PRIMARY KEY AUTO_INCREMENT,
     patient_id INT NOT NULL,
-    tooth_number VARCHAR(10),
+    tooth_number TEXT,
     treatment_name VARCHAR(100) NOT NULL,
     quantity INT DEFAULT 1,
     price_per_unit DECIMAL(10,2),
     total_price DECIMAL(10,2),
-    discount_type ENUM('percentage', 'fixed') DEFAULT 'percentage',
-    discount_value DECIMAL(10,2) DEFAULT 0,
-    net_total DECIMAL(10,2),
-    notes TEXT,
     status VARCHAR(20) DEFAULT 'planned',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
 );
 
--- Visits table
 CREATE TABLE visits (
     id INT PRIMARY KEY AUTO_INCREMENT,
     patient_id INT NOT NULL,

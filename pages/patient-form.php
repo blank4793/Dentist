@@ -626,31 +626,31 @@ if (isset($patientId)) {
                                 <label for="treatmentSelect">Select Treatment:</label>
                                 <select id="treatmentSelect" name="treatment">
                                     <option value="">Select Treatment</option>
-                                    <option value="consultation">Consultation (₹1000)</option>
-                                    <option value="radiograph">Radiograph (₹1500)</option>
-                                    <option value="fillingD">Filling Direct (₹3000)</option>
-                                    <option value="fillingI">Filling Indirect (₹2500)</option>
-                                    <option value="rct">RCT (₹15000)</option>
-                                    <option value="pfmCrownD">PFM Crown Direct (₹12000)</option>
-                                    <option value="pfmCrownI">PFM Crown Indirect (₹10000)</option>
-                                    <option value="zirconia">Zirconia (₹20000)</option>
-                                    <option value="extSimple">Extraction Simple (₹2000)</option>
-                                    <option value="extComp">Extraction Complex (₹4000)</option>
-                                    <option value="acrylicDent">Acrylic Denture (₹25000)</option>
-                                    <option value="ccPlate">CC Plate (₹8000)</option>
-                                    <option value="completeDenture">Complete Denture (₹35000)</option>
-                                    <option value="flexideDenture">Flexide Denture (₹40000)</option>
-                                    <option value="bridgeD">Bridge Direct (₹30000)</option>
-                                    <option value="bridgeI">Bridge Indirect (₹25000)</option>
-                                    <option value="implant">Implant (₹50000)</option>
-                                    <option value="laserTeethWhitening">Laser Teeth Whitening (₹15000)</option>
-                                    <option value="postAndCore">Post and Core (₹8000)</option>
-                                    <option value="peadFilling">Pead Filling (₹2500)</option>
-                                    <option value="peadExt">Pead Extraction (₹2000)</option>
-                                    <option value="pulpotomy">Pulpotomy (₹5000)</option>
-                                    <option value="toothJewels">Tooth Jewels (₹3000)</option>
-                                    <option value="scalingAndPolishing">Scaling and Polishing (₹3500)</option>
-                                    <option value="rootPlanning">Root Planning (₹5000)</option>
+                                    <option value="consultation">Consultation (Rs. 1000)</option>
+                                    <option value="radiograph">Radiograph (Rs. 1500)</option>
+                                    <option value="fillingD">Filling Direct (Rs. 3000)</option>
+                                    <option value="fillingI">Filling Indirect (Rs. 2500)</option>
+                                    <option value="rct">RCT (Rs. 15000)</option>
+                                    <option value="pfmCrownD">PFM Crown Direct (Rs. 12000)</option>
+                                    <option value="pfmCrownI">PFM Crown Indirect (Rs. 10000)</option>
+                                    <option value="zirconia">Zirconia (Rs. 20000)</option>
+                                    <option value="extSimple">Extraction Simple (Rs. 2000)</option>
+                                    <option value="extComp">Extraction Complex (Rs. 4000)</option>
+                                    <option value="acrylicDent">Acrylic Denture (Rs. 25000)</option>
+                                    <option value="ccPlate">CC Plate (Rs. 8000)</option>
+                                    <option value="completeDenture">Complete Denture (Rs. 35000)</option>
+                                    <option value="flexideDenture">Flexide Denture (Rs. 40000)</option>
+                                    <option value="bridgeD">Bridge Direct (Rs. 30000)</option>
+                                    <option value="bridgeI">Bridge Indirect (Rs. 25000)</option>
+                                    <option value="implant">Implant (Rs. 50000)</option>
+                                    <option value="laserTeethWhitening">Laser Teeth Whitening (Rs. 15000)</option>
+                                    <option value="postAndCore">Post and Core (Rs. 8000)</option>
+                                    <option value="peadFilling">Pead Filling (Rs. 2500)</option>
+                                    <option value="peadExt">Pead Extraction (Rs. 2000)</option>
+                                    <option value="pulpotomy">Pulpotomy (Rs. 5000)</option>
+                                    <option value="toothJewels">Tooth Jewels (Rs. 3000)</option>
+                                    <option value="scalingAndPolishing">Scaling and Polishing (Rs. 3500)</option>
+                                    <option value="rootPlanning">Root Planning (Rs. 5000)</option>
                                 </select>
                             </div>
                         </div>
@@ -756,6 +756,20 @@ if (isset($patientId)) {
                     </div>
 
                     <input type="hidden" id="treatmentsInput" name="treatments" value="">
+
+                    <div class="disclaimer-section">
+                        <h3>PLEASE READ THIS CAREFULLY</h3>
+                        <p class="disclaimer-text" style="font-style: italic;">
+                            I Affirm that the above information is best to my knowledge. I have not concealed any information regarding 
+                            my medical history, I am fully aware that correct history is very important for the outcome of my treatment. 
+                            I also affirm that I have discussed and understood the treatment and cost details. There is no guarantee for 
+                            any treatment however responsibility of treatment may be for taken by the clinic.
+                        </p>
+                        <div class="signature-section">
+                            <p><strong>PATIENT SIGNATURE</strong></p>
+                            <div class="signature-line">____________________________</div>
+                        </div>
+                    </div>
 
                     <button type="submit" class="submit-btn">Submit Registration</button>
                 </form>
