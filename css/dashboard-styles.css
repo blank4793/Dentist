@@ -14,17 +14,122 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: var(--background-color);
+    background: linear-gradient(135deg, #0061f2 0%, #00c6f9 100%);
+    padding: 20px;
 }
 
 .login-box {
     background: white;
     padding: 40px;
-    border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 400px;
     text-align: center;
+}
+
+.login-logo {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 30px;
+    border-radius: 15px;
+    padding: 10px;
+    background: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.login-box h2 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 30px;
+    font-weight: 600;
+}
+
+.login-form-group {
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.login-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.login-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e1e5ee;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #333;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.login-input:focus {
+    border-color: #0061f2;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 97, 242, 0.1);
+    background: white;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    background: #0061f2;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.login-btn:hover {
+    background: #0056d6;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(0, 97, 242, 0.2);
+}
+
+.login-footer {
+    margin-top: 30px;
+    color: #666;
+    font-size: 14px;
+}
+
+.error-message {
+    background: #ffe5e5;
+    color: #cf0000;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.error-message i {
+    font-size: 16px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .login-box {
+        padding: 30px 20px;
+    }
+
+    .login-logo {
+        width: 100px;
+        height: 100px;
+    }
 }
 
 /* Dashboard Styles */
@@ -36,65 +141,95 @@
 }
 
 .sidebar {
-    width: var(--sidebar-width);
-    background-color: white;
-    border-right: 1px solid var(--border-color);
-    display: flex;
-    flex-direction: column;
-    position: fixed;
+    width: 250px;
     height: 100vh;
+    position: fixed;
     left: 0;
     top: 0;
+    background: white;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    z-index: 1000;
 }
 
-.nav-menu {
-    margin: 30px 0;
+.logo-container {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid #dee2e6;
 }
 
-.nav-item {
+.logo-container img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 10px;
+}
+
+.logo-container h2 {
+    font-size: 18px;
+    color: #333;
+    margin: 0;
+}
+
+/* Navigation Menu */
+.sidebar nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar nav ul li {
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar nav ul li a {
     display: flex;
     align-items: center;
-    padding: 12px 15px;
+    padding: 15px 20px;
     color: #333;
     text-decoration: none;
-    border-radius: 8px;
-    margin-bottom: 5px;
     transition: all 0.3s ease;
+    gap: 10px;
 }
 
-.nav-item:hover {
-    background-color: #e3f2fd;
-    color: var(--primary-color);
+.sidebar nav ul li a:hover {
+    background: #f8f9fa;
+    color: #007bff;
 }
 
-.nav-item.active {
-    background-color: var(--primary-color);
-    color: white;
+.sidebar nav ul li a i {
+    width: 20px;
+    text-align: center;
 }
 
-.icon {
-    margin-right: 10px;
-    font-size: 20px;
-}
-
+/* User Section */
 .user-section {
-    margin-top: auto;
-    padding: 15px;
-    border-top: 1px solid var(--border-color);
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 20px;
+    border-top: 1px solid #dee2e6;
+    background: white;
+}
+
+.user-section span {
+    display: block;
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 14px;
 }
 
 .logout-btn {
     display: inline-block;
     padding: 8px 16px;
-    background-color: #dc3545;
+    background: #dc3545;
     color: white;
     text-decoration: none;
     border-radius: 4px;
-    margin-top: 10px;
+    transition: background 0.3s ease;
 }
 
 .logout-btn:hover {
-    background-color: #c82333;
+    background: #c82333;
 }
 
 .main-content {
@@ -164,13 +299,28 @@
 }
 
 /* Action Buttons */
-.btn-edit, .btn-view {
-    padding: 6px 12px;
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+}
+
+.btn {
+    padding: 8px 15px;
+    border: none;
     border-radius: 4px;
-    text-decoration: none;
-    margin-right: 5px;
-    display: inline-block;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     font-size: 14px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-view {
+    background-color: #0d6efd;
+    color: white;
 }
 
 .btn-edit {
@@ -178,17 +328,14 @@
     color: #000;
 }
 
-.btn-view {
-    background-color: #17a2b8;
+.btn-delete {
+    background-color: #dc3545;
     color: white;
 }
 
-.btn-edit:hover {
-    background-color: #e0a800;
-}
-
-.btn-view:hover {
-    background-color: #138496;
+.btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
 }
 
 /* Header Section */
@@ -1235,4 +1382,282 @@
     .main-content-grid {
         grid-template-columns: 1fr;
     }
+} 
+
+/* Selected teeth info styles for edit form */
+.dental-chart-section .selected-teeth-info {
+    margin-top: 20px;
+    margin-bottom: 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+#selectedTeethList {
+    min-height: 30px;
+    margin-bottom: 0;
+} 
+
+/* Quantity Input Styles */
+.quantity-input {
+    width: 80px;
+    height: 35px;
+    padding: 5px 10px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 14px;
+    -moz-appearance: textfield; /* For Firefox */
+}
+
+/* Show arrows for Chrome/Safari/Edge */
+.quantity-input::-webkit-outer-spin-button,
+.quantity-input::-webkit-inner-spin-button {
+    -webkit-appearance: auto;
+    margin: 0;
+    opacity: 1;
+} 
+
+/* Treatment table styles */
+.treatments-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.treatments-table th,
+.treatments-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.treatments-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+/* Align price columns to right */
+.treatments-table td:nth-child(3),
+.treatments-table td:nth-child(4),
+.treatments-table th:nth-child(3),
+.treatments-table th:nth-child(4) {
+    text-align: right;
+}
+
+/* Center quantity column */
+.treatments-table td:nth-child(2),
+.treatments-table th:nth-child(2) {
+    text-align: center;
+} 
+
+/* Quantity Controls */
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.quantity-btn {
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    border: 1px solid #dee2e6;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #333;
+    transition: all 0.2s;
+}
+
+.quantity-btn:hover {
+    background: #e9ecef;
+}
+
+.quantity-btn:active {
+    background: #dee2e6;
+}
+
+.quantity-input {
+    width: 50px;
+    height: 25px;
+    text-align: center;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 14px;
+    padding: 0 5px;
+    background: #fff;
+    pointer-events: none;
+} 
+
+/* Patient List Styles */
+.patient-list-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.patient-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.patient-table th,
+.patient-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.patient-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #333;
+}
+
+.patient-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.patient-table .action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+/* Action Buttons */
+.btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+}
+
+.btn-view {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.btn-edit {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.btn-delete {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* Add New Patient Button */
+.btn-primary {
+    background-color: #0d6efd;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    transform: translateY(-1px);
+} 
+
+/* Serial Number Column */
+.patient-table td:first-child,
+.patient-table th:first-child {
+    width: 80px;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* Ensure action buttons stay on one line */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    min-width: 200px;
+} 
+
+/* Search Section Styles */
+.search-section {
+    margin-bottom: 20px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-form {
+    width: 100%;
+}
+
+.search-input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.search-input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px rgba(13,110,253,0.25);
+}
+
+.search-btn {
+    padding: 10px 20px;
+    background: #0d6efd;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+}
+
+.search-btn:hover {
+    background: #0b5ed7;
+}
+
+/* Add loading state */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* No results message */
+.no-results {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-style: italic;
 } 

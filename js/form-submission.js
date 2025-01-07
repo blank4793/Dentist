@@ -347,47 +347,67 @@ $(document).ready(function() {
 
     // Update the treatments table display
     function updateTreatmentsTable() {
-        const tbody = $('#selectedTreatmentsList');
+        const tbody = $('#treatmentsTableBody');
         tbody.empty();
 
         window.treatments.forEach((treatment, index) => {
             const row = $(`
                 <tr>
-                    <td>${formatTreatmentDisplay(treatment)}</td>
+                    <td>${treatment.name}</td>
                     <td>
-                        <input type="number" value="${treatment.quantity}" min="1" 
-                               onchange="updateQuantity(${index}, this.value)">
+                        <div class="quantity-controls">
+                            <button type="button" class="quantity-btn minus" onclick="updateQuantity(${index}, ${treatment.quantity - 1})">-</button>
+                            <input type="number" 
+                                   class="quantity-input"
+                                   value="${treatment.quantity}" 
+                                   min="1"
+                                   step="1"
+                                   onchange="updateQuantity(${index}, this.value)"
+                                   readonly>
+                            <button type="button" class="quantity-btn plus" onclick="updateQuantity(${index}, ${treatment.quantity + 1})">+</button>
+                        </div>
                     </td>
-                    <td>Rs. ${treatment.pricePerUnit.toFixed(2)}</td>
-                    <td>Rs. ${treatment.totalPrice.toFixed(2)}</td>
+                    <td>Rs. ${formatPrice(treatment.pricePerUnit)}</td>
+                    <td>Rs. ${formatPrice(treatment.totalPrice)}</td>
                     <td>
-                        <button type="button" onclick="removeTreatment(${index})" class="remove-btn">
-                            Remove
-                        </button>
+                        <button type="button" onclick="removeTreatment(${index})" class="remove-btn">Remove</button>
                     </td>
                 </tr>
             `);
             tbody.append(row);
         });
 
-        // Update hidden input with treatments data
-        $('#treatmentsInput').val(JSON.stringify(window.treatments));
+        // Update total amount
+        let totalAmount = window.treatments.reduce((sum, treatment) => sum + treatment.totalPrice, 0);
+        $('#totalAmount').text(`Rs. ${formatPrice(totalAmount)}`);
+    }
+
+    // Helper function for price formatting with commas
+    function formatPrice(amount) {
+        // Convert to number if it's a string
+        amount = typeof amount === 'string' ? parseFloat(amount) : amount;
+        return amount.toLocaleString('en-IN', {
+            maximumFractionDigits: 0,
+            minimumFractionDigits: 0
+        });
     }
 
     // Update billing table
     function updateBillingTable() {
-        let totalAmount = 0;
-        window.treatments.forEach(treatment => {
-            totalAmount += treatment.totalPrice;
-        });
-
-        $('#totalAmount').text(`Rs. ${totalAmount.toFixed(2)}`);
+        let totalAmount = window.treatments.reduce((sum, treatment) => sum + treatment.totalPrice, 0);
+        
+        // Update total amount displays with commas
+        $('.total-row #totalAmount').text(`Rs. ${formatPrice(totalAmount)}`);
+        $('#totalAmount').text(`Rs. ${formatPrice(totalAmount)}`);
         calculateNetTotal();
     }
 
     // Calculate net total
     function calculateNetTotal() {
-        const totalAmount = parseFloat($('#totalAmount').text().replace('Rs. ', '')) || 0;
+        // Get total amount by removing 'Rs. ' and commas
+        const totalAmountText = $('#totalAmount').text().replace(/Rs\.|,/g, '').trim();
+        const totalAmount = parseFloat(totalAmountText) || 0;
+        
         const discountType = $('#discountType').val();
         const discountValue = parseFloat($('#discountValue').val()) || 0;
 
@@ -398,18 +418,26 @@ $(document).ready(function() {
             netTotal = totalAmount - discountValue;
         }
 
-        $('#netTotal').text(`Rs. ${Math.max(0, netTotal).toFixed(2)}`);
+        // Format net total with commas
+        $('#netTotal').text(`Rs. ${formatPrice(Math.max(0, netTotal))}`);
+
+        // Keep existing visit balance calculation
         updateVisitBalances();
     }
 
     // Update quantity function
     window.updateQuantity = function(index, quantity) {
-        const qty = parseInt(quantity) || 1;
-        window.treatments[index].quantity = qty;
-        window.treatments[index].totalPrice = qty * window.treatments[index].pricePerUnit;
-        updateTreatmentsTable();
-        updateBillingTable();
-        calculateNetTotal();
+        const qty = Math.max(1, parseInt(quantity) || 1); // Ensure minimum of 1
+        if (window.treatments[index]) {
+            // Update quantity and recalculate total price
+            window.treatments[index].quantity = qty;
+            window.treatments[index].totalPrice = qty * window.treatments[index].pricePerUnit;
+            
+            // Update all displays
+            updateTreatmentsTable();
+            updateBillingTable();
+            calculateNetTotal();
+        }
     };
 
     // Remove treatment function
@@ -510,4 +538,35 @@ $(document).ready(function() {
         $('#visitsTableBody').append(firstVisitRow);
         updateVisitBalances();
     }
+
+    // Format existing billing amounts
+    $('.treatments-table td:nth-child(4), .treatments-table td:nth-child(5)').each(function() {
+        const amount = parseFloat($(this).text().replace(/[^0-9.-]+/g, ''));
+        if (!isNaN(amount)) {
+            $(this).text(`Rs. ${formatPrice(amount)}`);
+        }
+    });
+
+    // Format existing visit amounts
+    $('.visits-table .amount-paid-input, .visits-table .balance-input').each(function() {
+        const amount = parseFloat($(this).val());
+        if (!isNaN(amount)) {
+            $(this).val(formatPrice(amount));
+        }
+    });
+
+    // Format prices in the treatments table
+    $('.treatments-table td:nth-child(4), .treatments-table td:nth-child(5)').each(function() {
+        const amount = parseFloat($(this).text().replace(/[^0-9.-]+/g, ''));
+        if (!isNaN(amount)) {
+            $(this).text(`Rs. ${formatPrice(amount)}`);
+        }
+    });
+
+    // Format total amount and net total
+    const totalAmount = parseFloat($('#totalAmount').text().replace(/[^0-9.-]+/g, '')) || 0;
+    $('#totalAmount').text(`Rs. ${formatPrice(totalAmount)}`);
+    
+    const netTotal = parseFloat($('#netTotal').text().replace(/[^0-9.-]+/g, '')) || 0;
+    $('#netTotal').text(`Rs. ${formatPrice(netTotal)}`);
 });

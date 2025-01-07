@@ -662,7 +662,8 @@ if (isset($patientId)) {
                             </div>
                         </div>
 
-                        <table class="selected-treatments-table">
+                        <!-- Treatment Table -->
+                        <table class="treatments-table">
                             <thead>
                                 <tr>
                                     <th>Treatment</th>
@@ -672,13 +673,13 @@ if (isset($patientId)) {
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="selectedTreatmentsList">
-                                <!-- Treatments will be added here -->
+                            <tbody id="treatmentsTableBody">
+                                <!-- Treatments will be added here dynamically -->
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td colspan="3">Total Amount</td>
-                                    <td colspan="2"><span id="totalAmount">Rs. 0.00</span></td>
+                                    <td colspan="3" style="text-align: right;"><strong>Total Amount:</strong></td>
+                                    <td colspan="2"><span id="totalAmount" class="amount">Rs. 0</span></td>
                                 </tr>
                             </tfoot>
                         </table>

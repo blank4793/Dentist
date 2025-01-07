@@ -319,20 +319,6 @@ try {
                             </div>
                         </div>
 
-                        <!-- Dental Chart -->
-                        <div class="dental-chart-section">
-                            <h3>DENTAL CHART</h3>
-                            <div class="chart-container">
-                                <?php include '../templates/dental-chart.html'; ?>
-                                <div class="selected-teeth-info">
-                                    <h4>Selected Teeth</h4>
-                                    <div id="selectedTeethList"></div>
-                                    <input type="hidden" id="selectedTeethInput" name="selected_teeth" 
-                                           value="<?php echo htmlspecialchars($patient['selected_teeth']); ?>">
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Diagnosis Section -->
                         <div class="diagnosis-section">
                             <h3>DIAGNOSIS</h3>
@@ -350,6 +336,19 @@ try {
                                 <div class="form-group">
                                     <textarea id="treatmentAdvised" name="treatmentAdvised" class="auto-expand"><?php echo htmlspecialchars($patient['treatment_advised']); ?></textarea>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Dental Chart Section -->
+                        <div class="dental-chart-section">
+                            <h3>DENTAL CHART</h3>
+                            <div class="dental-chart">
+                                <?php include '../templates/dental-chart.html'; ?>
+                            </div>
+                            <div class="selected-teeth-info">
+                                <h4>Selected Teeth</h4>
+                                <div id="selectedTeethList"></div>
+                                <input type="hidden" id="selectedTeethInput" name="selected_teeth" value="<?php echo htmlspecialchars($patient['selected_teeth']); ?>">
                             </div>
                         </div>
 
@@ -392,7 +391,6 @@ try {
                                         <option value="completeDentureSoft">Complete denture (soft liner) U/L (Rs. 115000)</option>
                                         <option value="digitalImpressions">Digital Impressions (Rs. 5000)</option>
                                     </select>
-                                    <button type="button" id="addTreatment" class="add-treatment-btn">Add Treatment</button>
                                 </div>
                             </div>
 

@@ -46,35 +46,57 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dental Clinic - Login</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <title>Login - The Dental Clinic</title>
+    <link rel="stylesheet" href="../css/dashboard-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
     <div class="login-container">
         <div class="login-box">
-            <img src="../assets/images/logo.jpeg" alt="Dental Clinic Logo" class="logo">
-            <h1>THE DENTAL CLINIC</h1>
+            <img src="../assets/images/logo.jpeg" alt="Dental Clinic Logo" class="login-logo">
+            <h2>Welcome Back!</h2>
+            
             <?php if (isset($error)): ?>
-                <div class="error-message"><?php echo $error; ?></div>
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                <?php echo $error; ?>
+            </div>
             <?php endif; ?>
-            <form method="POST" action="">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" required>
+
+            <form method="post" action="login.php">
+                <div class="login-form-group">
+                    <label for="username">
+                        <i class="fas fa-user"></i> Username
+                    </label>
+                    <input type="text" 
+                           id="username" 
+                           name="username" 
+                           class="login-input" 
+                           placeholder="Enter your username"
+                           required>
                 </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required>
+
+                <div class="login-form-group">
+                    <label for="password">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <input type="password" 
+                           id="password" 
+                           name="password" 
+                           class="login-input" 
+                           placeholder="Enter your password"
+                           required>
                 </div>
-                <button type="submit" class="login-btn">Login</button>
+
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
             </form>
+
+            <div class="login-footer">
+                <p>The Dental Clinic Management System</p>
+            </div>
         </div>
     </div>
-    <?php if (!empty($debug)): ?>
-        <div style="margin-top: 20px; padding: 10px; background: #f0f0f0;">
-            <h3>Debug Information:</h3>
-            <pre><?php print_r($debug); ?></pre>
-        </div>
-    <?php endif; ?>
 </body>
 </html> 

@@ -35,6 +35,9 @@ $recentPatients = $stmt->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dental Clinic - Dashboard</title>
     <link rel="stylesheet" href="../css/dashboard-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="../js/dashboard.js"></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -68,6 +71,7 @@ $recentPatients = $stmt->fetchAll();
                 <table class="patient-table">
                     <thead>
                         <tr>
+                            <th>Sr. No</th>
                             <th>Name</th>
                             <th>Date</th>
                             <th>Phone</th>
@@ -75,15 +79,25 @@ $recentPatients = $stmt->fetchAll();
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($recentPatients as $patient): ?>
-                        <tr>
+                        <?php 
+                        $serialNumber = 1;
+                        foreach ($recentPatients as $patient): 
+                        ?>
+                        <tr data-patient-id="<?php echo $patient['id']; ?>">
+                            <td><?php echo $serialNumber++; ?></td>
                             <td><?php echo htmlspecialchars($patient['name']); ?></td>
                             <td><?php echo htmlspecialchars($patient['date']); ?></td>
                             <td><?php echo htmlspecialchars($patient['phone']); ?></td>
-                            <td class="actions">
-                                <a href="view_patient.php?id=<?php echo $patient['id']; ?>" class="view-btn">View</a>
-                                <a href="edit_patient.php?id=<?php echo $patient['id']; ?>" class="edit-btn">Edit</a>
-                                <button class="delete-btn" onclick="deletePatient(<?php echo $patient['id']; ?>)">Delete</button>
+                            <td class="action-buttons">
+                                <a href="view_patient.php?id=<?php echo $patient['id']; ?>" class="btn btn-view">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                <a href="edit_patient.php?id=<?php echo $patient['id']; ?>" class="btn btn-edit">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <button type="button" class="btn btn-delete" data-id="<?php echo $patient['id']; ?>">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
                             </td>
                         </tr>
                         <?php endforeach; ?>
