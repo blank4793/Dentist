@@ -15,16 +15,23 @@ if (session_status() === PHP_SESSION_NONE) {
 <body>
     <?php if (isset($_SESSION['user_id'])): ?>
     <div class="sidebar">
-        <div class="logo-container">
-            <img src="../assets/images/logo.jpeg" alt="Logo" class="logo">
+        <div class="logo-section">
+            <img src="../assets/images/logo.jpeg" alt="Dental Clinic Logo" class="dashboard-logo">
             <h2>THE DENTAL CLINIC</h2>
         </div>
-        <nav>
-            <ul>
-                <li><a href="dashboard.php"><i class="fas fa-home"></i> Dashboard</a></li>
-                <li><a href="patient-form.php"><i class="fas fa-user-plus"></i> Add New Patient</a></li>
-                <li><a href="patient-list.php"><i class="fas fa-users"></i> Patient List</a></li>
-            </ul>
+        <nav class="nav-menu">
+            <a href="../pages/dashboard.php" class="nav-item <?php echo basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : ''; ?>">
+                <i class="icon">📊</i> Dashboard
+            </a>
+            <a href="../pages/patient-form.php" class="nav-item <?php echo basename($_SERVER['PHP_SELF']) == 'patient-form.php' ? 'active' : ''; ?>">
+                <i class="icon">➕</i> Add New Patient
+            </a>
+            <a href="../pages/patient-list.php" class="nav-item <?php echo basename($_SERVER['PHP_SELF']) == 'patient-list.php' ? 'active' : ''; ?>">
+                <i class="icon">📋</i> Patient List
+            </a>
+            <a href="../pages/appointments.php" class="nav-item <?php echo basename($_SERVER['PHP_SELF']) == 'appointments.php' ? 'active' : ''; ?>">
+                <i class="icon">📅</i> Appointments
+            </a>
         </nav>
         <div class="user-section">
             <span id="userName"><?php echo htmlspecialchars($_SESSION['user_name'] ?? ''); ?></span>
