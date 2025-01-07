@@ -557,7 +557,7 @@ try {
                     <div class="error-message"><?php echo $error; ?></div>
                 <?php else: ?>
                     <div class="patient-details">
-                        <!-- Basic Information -->
+                        <!-- Patient Information Section -->
                         <div class="section">
                             <h3>Patient Information</h3>
                             <div class="info-grid">
