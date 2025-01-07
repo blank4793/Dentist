@@ -12,11 +12,17 @@ if (!isset($_SESSION['user_id'])) {
 $stmt = $pdo->query("
     SELECT 
         p.*,
-        t.treatment_name,
-        t.status,
-        t.treatment_date
+        dt.treatment_name,
+        dt.status,
+        dt.price_per_unit,
+        dt.quantity,
+        dt.total_price
     FROM patients p
-    LEFT JOIN treatments t ON p.id = t.patient_id
+    LEFT JOIN (
+        SELECT patient_id, treatment_name, status, price_per_unit, quantity, total_price,
+               ROW_NUMBER() OVER (PARTITION BY patient_id ORDER BY created_at DESC) as rn
+        FROM dental_treatments
+    ) dt ON p.id = dt.patient_id AND dt.rn = 1
     ORDER BY p.created_at DESC
 ");
 $patients = $stmt->fetchAll();

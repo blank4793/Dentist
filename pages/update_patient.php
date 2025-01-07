@@ -45,6 +45,7 @@ try {
         // 1. Update patient information
         $stmt = $pdo->prepare("
             UPDATE patients SET 
+                patient_id = :patient_id,
                 name = :name,
                 date = :date,
                 sector = :sector,
@@ -59,10 +60,11 @@ try {
                 diagnosis = :diagnosis,
                 treatment_advised = :treatment_advised,
                 selected_teeth = :selected_teeth
-            WHERE id = :patient_id
+            WHERE id = :id
         ");
 
         $stmt->execute([
+            'patient_id' => $patientData['patientId'],
             'name' => $patientData['name'],
             'date' => $patientData['date'],
             'sector' => $patientData['sector'],
@@ -77,7 +79,7 @@ try {
             'diagnosis' => $patientData['diagnosis'] ?? null,
             'treatment_advised' => $patientData['treatmentAdvised'] ?? null,
             'selected_teeth' => $patientData['selectedTeeth'] ?? null,
-            'patient_id' => $patientId
+            'id' => $patientId
         ]);
 
         // 2. Update medical history

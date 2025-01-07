@@ -20,6 +20,7 @@ CREATE TABLE users (
 
 CREATE TABLE patients (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_id VARCHAR(50) UNIQUE,
     name VARCHAR(100) NOT NULL,
     date DATE NOT NULL,
     sector VARCHAR(50),
@@ -79,12 +80,9 @@ CREATE TABLE billing (
 CREATE TABLE dental_treatments (
     id INT PRIMARY KEY AUTO_INCREMENT,
     patient_id INT NOT NULL,
-    tooth_number TEXT,
-    treatment_name VARCHAR(100) NOT NULL,
-    quantity INT DEFAULT 1,
-    price_per_unit DECIMAL(10,2),
-    total_price DECIMAL(10,2),
-    status VARCHAR(20) DEFAULT 'planned',
+    treatment_name VARCHAR(255) NOT NULL,
+    status VARCHAR(50) DEFAULT 'Pending',
+    treatment_date DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
 );
@@ -101,6 +99,22 @@ CREATE TABLE visits (
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
 );
 
+-- Add treatments table
+CREATE TABLE treatments (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_id INT NOT NULL,
+    treatment_name VARCHAR(255) NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    price_per_unit DECIMAL(10,2) NOT NULL,
+    total_price DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
+);
+
 -- Insert default admin user
 INSERT INTO users (username, password, name, role) 
 VALUES ('admin', '123', 'Administrator', 'admin'); 
+
+-- Add patient_id column to patients table
+ALTER TABLE patients 
+ADD COLUMN patient_id VARCHAR(50) UNIQUE AFTER id; 

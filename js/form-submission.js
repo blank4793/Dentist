@@ -1,572 +1,401 @@
+console.log('Form submission script loaded');
+console.log('jQuery version:', $.fn.jquery);
+
+function formatAmount(amount) {
+    // Convert to number if it's a string
+    amount = typeof amount === 'string' ? parseFloat(amount) : amount;
+    
+    // Format with commas for thousands
+    return amount.toLocaleString('en-IN', {
+        maximumFractionDigits: 0,
+        minimumFractionDigits: 0
+    });
+}
+
 $(document).ready(function() {
-    // Add these validation functions at the start
-    function validatePatientData(patientData) {
-        const errors = [];
-
-        // Required fields
-        if (!patientData.name) errors.push("Patient name is required");
-        if (!patientData.date) errors.push("Date is required");
-        if (!patientData.phone) errors.push("Phone number is required");
-
-        // Name validation (letters, spaces, and basic punctuation only)
-        if (!/^[A-Za-z\s\-'.]{2,100}$/.test(patientData.name)) {
-            errors.push("Name contains invalid characters or is too short/long");
-        }
-
-        // Age validation (0-150)
-        if (patientData.age < 0 || patientData.age > 150) {
-            errors.push("Age must be between 0 and 150");
-        }
-
-        // Phone validation (10-15 digits, allowing +, -, and spaces)
-        const cleanPhone = patientData.phone.replace(/[-()\s]/g, '');
-        if (!/^\+?\d{10,15}$/.test(cleanPhone)) {
-            errors.push("Invalid phone number format");
-        }
-
-        // Email validation if provided
-        if (patientData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(patientData.email)) {
-            errors.push("Invalid email format");
-        }
-
-        return errors;
-    }
-
-    function validateTreatments(treatments) {
-        const errors = [];
-
-        if (!treatments.length) {
-            errors.push("At least one treatment must be selected");
-        }
-
-        treatments.forEach((treatment, index) => {
-            if (!treatment.name) {
-                errors.push(`Treatment #${index + 1}: Name is required`);
-            }
-            if (treatment.quantity < 1) {
-                errors.push(`Treatment #${index + 1}: Quantity must be at least 1`);
-            }
-            if (treatment.pricePerUnit <= 0) {
-                errors.push(`Treatment #${index + 1}: Price must be greater than 0`);
-            }
-        });
-
-        return errors;
-    }
-
-    function validateVisits(visits) {
-        const errors = [];
-
-        visits.forEach((visit, index) => {
-            if (!visit.date) {
-                errors.push(`Visit #${index + 1}: Date is required`);
-            }
-            if (visit.amount < 0) {
-                errors.push(`Visit #${index + 1}: Amount cannot be negative`);
-            }
-            if (!['cash', 'card', 'insurance'].includes(visit.mode)) {
-                errors.push(`Visit #${index + 1}: Invalid payment mode`);
-            }
-        });
-
-        return errors;
-    }
-
-    // Form submission handling
-    $('#patientForm').on('submit', function(e) {
-        e.preventDefault();
-        console.log('Form submission started');
-
-        // Show loading state
-        $('.submit-btn').prop('disabled', true).text('Submitting...');
-
-        // Get signature data
-        const patientSignature = document.getElementById('patientSignatureData').value;
-        const doctorSignature = document.getElementById('doctorSignatureData').value;
-
-        // Collect all form data
-        const formData = {
-            patientData: {
-                name: $('#patientName').val(),
-                date: $('#date').val(),
-                sector: $('#sector').val(),
-                streetNo: $('#streetNo').val(),
-                houseNo: $('#houseNo').val(),
-                nonIslamabadAddress: $('#nonIslamabadAddress').val(),
-                phone: $('#phone').val(),
-                age: $('#age').val(),
-                gender: $('#gender').val(),
-                occupation: $('#occupation').val(),
-                email: $('#email').val()
-            },
-            medicalHistory: {
-                heartProblem: $('#heartProblem').is(':checked'),
-                bloodPressure: $('#bloodPressure').is(':checked'),
-                bleedingDisorder: $('#bleedingDisorder').is(':checked'),
-                bloodThinners: $('#bloodThinners').is(':checked'),
-                hepatitis: $('#hepatitis').is(':checked'),
-                diabetes: $('#diabetes').is(':checked'),
-                faintingSpells: $('#faintingSpells').is(':checked'),
-                allergyAnesthesia: $('#allergyAnesthesia').is(':checked'),
-                malignancy: $('#malignancy').is(':checked'),
-                previousSurgery: $('#previousSurgery').is(':checked'),
-                epilepsy: $('#epilepsy').is(':checked'),
-                asthma: $('#asthma').is(':checked'),
-                pregnant: $('#pregnant').is(':checked'),
-                phobia: $('#phobia').is(':checked'),
-                stomach: $('#stomach').is(':checked'),
-                allergy: $('#allergy').is(':checked'),
-                drugAllergy: $('#drugAllergy').is(':checked'),
-                smoker: $('#smoker').is(':checked'),
-                alcoholic: $('#alcoholic').is(':checked'),
-                otherConditions: $('#otherConditions').val()
-            },
-            treatments: window.treatments || [],
-            selectedTeeth: $('#selectedTeethInput').val(),
-            diagnosis: $('#diagnosis').val(),
-            treatmentAdvised: $('#treatmentAdvised').val()
-        };
-
-        console.log('Form data collected:', formData);
-
-        // Add this to your form submission data
-        const visits = [];
-        $('#visitsTableBody tr').each(function() {
-            visits.push({
-                date: $(this).find('.date-input').val(),
-                treatment: $(this).find('.treatment-input').val(),
-                amount: parseFloat($(this).find('.amount-paid-input').val()) || 0,
-                mode: $(this).find('.mode-input').val(),
-                balance: parseFloat($(this).find('.balance-input').val()) || 0
-            });
-        });
-
-        // Submit the form
-        $.ajax({
-            url: 'save_patient.php',
-            type: 'POST',
-            data: {
-                patientData: JSON.stringify(formData.patientData),
-                medicalHistory: JSON.stringify(formData.medicalHistory),
-                treatments: JSON.stringify(formData.treatments),
-                selectedTeeth: formData.selectedTeeth,
-                diagnosis: formData.diagnosis,
-                treatmentAdvised: formData.treatmentAdvised,
-                patient_signature_data: patientSignature,
-                doctor_signature_data: doctorSignature,
-                visits: JSON.stringify(visits),
-                discountType: $('#discountType').val(),
-                discountValue: $('#discountValue').val()
-            },
-            success: function(response) {
-                console.log('Server response:', response);
-                if (response.success) {
-                    alert('Patient data saved successfully!');
-                    window.location.href = `view_patient.php?id=${response.patientId}`;
-                } else {
-                    console.error('Server error:', response.message);
-                    alert('Error: ' + response.message);
-                    $('.submit-btn').prop('disabled', false).text('Submit Registration');
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('AJAX error:', {xhr, status, error});
-                alert('Error submitting form. Please try again.');
-                $('.submit-btn').prop('disabled', false).text('Submit Registration');
-            }
-        });
-    });
-
-    // Dental Chart Handling
-    const selectedTeeth = new Set();
+    // Clear any existing treatments
+    window.treatments = [];
     
-    // Get all tooth elements from SVG
-    const toothElements = document.querySelectorAll('#Spots polygon, #Spots path');
-    
-    // Tooth name mapping (FDI/ISO system)
-    const toothNames = {
-        18: "Upper Right Third Molar",
-        17: "Upper Right Second Molar",
-        16: "Upper Right First Molar",
-        15: "Upper Right Second Premolar",
-        14: "Upper Right First Premolar",
-        13: "Upper Right Canine",
-        12: "Upper Right Lateral Incisor",
-        11: "Upper Right Central Incisor",
-        21: "Upper Left Central Incisor",
-        22: "Upper Left Lateral Incisor",
-        23: "Upper Left Canine",
-        24: "Upper Left First Premolar",
-        25: "Upper Left Second Premolar",
-        26: "Upper Left First Molar",
-        27: "Upper Left Second Molar",
-        28: "Upper Left Third Molar",
-        38: "Lower Left Third Molar",
-        37: "Lower Left Second Molar",
-        36: "Lower Left First Molar",
-        35: "Lower Left Second Premolar",
-        34: "Lower Left First Premolar",
-        33: "Lower Left Canine",
-        32: "Lower Left Lateral Incisor",
-        31: "Lower Left Central Incisor",
-        41: "Lower Right Central Incisor",
-        42: "Lower Right Lateral Incisor",
-        43: "Lower Right Canine",
-        44: "Lower Right First Premolar",
-        45: "Lower Right Second Premolar",
-        46: "Lower Right First Molar",
-        47: "Lower Right Second Molar",
-        48: "Lower Right Third Molar"
-    };
-
-    // Add click handlers to teeth
-    toothElements.forEach(tooth => {
-        tooth.addEventListener('click', function() {
-            const toothId = this.getAttribute('data-key');
-            
-            if (selectedTeeth.has(toothId)) {
-                // Deselect tooth
-                selectedTeeth.delete(toothId);
-                this.classList.remove('selected');
-                removeToothFromList(toothId);
-            } else {
-                // Select tooth
-                selectedTeeth.add(toothId);
-                this.classList.add('selected');
-                addToothToList(toothId);
-            }
-            
-            // Update hidden input
-            updateSelectedTeethInput();
-        });
-    });
-
-    // Add tooth to the list display
-    function addToothToList(toothId) {
-        // First check if tooth is already in list
-        if (document.querySelector(`.selected-tooth-item[data-tooth-id="${toothId}"]`)) {
-            return; // Skip if already exists
-        }
-
-        const toothItem = document.createElement('div');
-        toothItem.className = 'selected-tooth-item';
-        toothItem.setAttribute('data-tooth-id', toothId);
-        
-        toothItem.innerHTML = `
-            ${toothNames[toothId]} (Tooth ${toothId})
-            <span class="remove-tooth" onclick="removeToothSelection('${toothId}')">&times;</span>
-        `;
-        
-        document.getElementById('selectedTeethList').appendChild(toothItem);
-    }
-
-    // Remove tooth from the list display
-    function removeToothFromList(toothId) {
-        const toothItem = document.querySelector(`.selected-tooth-item[data-tooth-id="${toothId}"]`);
-        if (toothItem) {
-            toothItem.remove();
-        }
-    }
-
-    // Update hidden input with selected teeth
-    function updateSelectedTeethInput() {
-        const selectedTeethInput = document.getElementById('selectedTeethInput');
-        if (selectedTeethInput) {
-            selectedTeethInput.value = Array.from(selectedTeeth).join(',');
-        }
-    }
-
-    // Global function to remove tooth selection
-    window.removeToothSelection = function(toothId) {
-        const tooth = document.querySelector(`#Spots [data-key="${toothId}"]`);
-        if (tooth) {
-            tooth.classList.remove('selected');
-        }
-        selectedTeeth.delete(toothId);
-        removeToothFromList(toothId);
-        updateSelectedTeethInput();
-    };
-
-    // Treatment Section
-    window.treatments = []; // Store treatments globally
-
     // Treatment selection handling
-    $('#treatmentSelect').change(function() {
-        const selectedValue = $(this).val();
-        if (!selectedValue) return;
-
-        // Get the selected option text and price
+    $('#treatmentSelect').on('change', function() {
         const selectedOption = $(this).find('option:selected');
-        const optionText = selectedOption.text();
-        const priceMatch = optionText.match(/Rs\. (\d+)/);
-        const price = priceMatch ? parseFloat(priceMatch[1]) : 0;
-        const treatmentName = optionText.split('(Rs.')[0].trim();
+        if (!selectedOption.val()) return;
 
-        // Get selected teeth
-        const selectedTeethArray = $('#selectedTeethInput').val() ? 
-            $('#selectedTeethInput').val().split(',').filter(Boolean) : 
-            [];
+        const treatmentText = selectedOption.text();
+        const priceMatch = treatmentText.match(/Rs\. (\d+)/);
+        if (!priceMatch) return;
 
-        // Create new treatment object
-        const newTreatment = {
-            id: selectedValue,
-            name: treatmentName,
-            quantity: 1,
-            pricePerUnit: price,
-            totalPrice: price,
-            selectedTeeth: selectedTeethArray
-        };
+        const price = parseFloat(priceMatch[1]);
+        const treatmentName = treatmentText.split('(')[0].trim();
 
-        // Initialize treatments array if it doesn't exist
-        if (!window.treatments) {
-            window.treatments = [];
-        }
+        // Add new row to treatments table
+        const newRow = `
+            <tr>
+                <td>${treatmentName}</td>
+                <td>
+                    <div class="quantity-controls">
+                        <button type="button" class="quantity-btn minus">-</button>
+                        <input type="number" class="quantity-input" value="1" min="1" readonly>
+                        <button type="button" class="quantity-btn plus">+</button>
+                    </div>
+                </td>
+                <td>Rs. ${formatAmount(price)}</td>
+                <td class="total">Rs. ${formatAmount(price)}</td>
+                <td>
+                    <button type="button" class="remove-treatment">Remove</button>
+                </td>
+            </tr>
+        `;
 
-        // Add the new treatment
-        window.treatments.push(newTreatment);
-
-        // Update displays
-        updateTreatmentsTable();
-        updateBillingTable();
-        calculateNetTotal();
-
-        // Reset select
+        $('#treatmentsTableBody').append(newRow);
+        calculateAllTotals();
         $(this).val('');
     });
 
-    // Add this function to format the treatment display
-    function formatTreatmentDisplay(treatment) {
-        let display = treatment.name;
-        if (treatment.selectedTeeth && treatment.selectedTeeth.length > 0) {
-            if (treatment.name.includes('Per tooth') || treatment.name.includes('U/L')) {
-                display += ` (${treatment.selectedTeeth.join(', ')})`;
-            }
+    // Handle quantity buttons
+    $(document).on('click', '.quantity-btn', function() {
+        const input = $(this).siblings('.quantity-input');
+        const row = $(this).closest('tr');
+        let currentValue = parseInt(input.val()) || 1;
+        
+        // Get the base price from the Price/Unit column
+        const basePrice = parseFloat(row.find('td:eq(2)').text().replace(/[^0-9.-]+/g, ''));
+        
+        if ($(this).hasClass('plus')) {
+            currentValue += 1;
+        } else if ($(this).hasClass('minus') && currentValue > 1) {
+            currentValue -= 1;
         }
-        return display;
-    }
+        
+        input.val(currentValue);
+        
+        // Calculate new total for this row
+        const rowTotal = basePrice * currentValue;
+        row.find('.total').text(`Rs. ${formatAmount(rowTotal)}`);
+        
+        calculateAllTotals();
+    });
 
-    // Update the treatments table display
-    function updateTreatmentsTable() {
-        const tbody = $('#treatmentsTableBody');
-        tbody.empty();
+    // Handle treatment removal
+    $(document).on('click', '.remove-treatment', function() {
+        $(this).closest('tr').remove();
+        calculateAllTotals();
+    });
 
-        window.treatments.forEach((treatment, index) => {
-            const row = $(`
+    // Calculate all totals
+    function calculateAllTotals() {
+        let grandTotal = 0;
+        
+        // Calculate totals for each row and update billing list
+        $('#billingList').empty();
+        
+        $('#treatmentsTableBody tr').each(function() {
+            const treatment = $(this).find('td:eq(0)').text();
+            const quantity = parseInt($(this).find('.quantity-input').val()) || 1;
+            const basePrice = parseFloat($(this).find('td:eq(2)').text().replace(/[^0-9]/g, ''));
+            const rowTotal = basePrice * quantity;
+            
+            $(this).find('.total').text(`Rs. ${formatAmount(rowTotal)}`);
+            grandTotal += rowTotal;
+            
+            $('#billingList').append(`
                 <tr>
-                    <td>${treatment.name}</td>
-                    <td>
-                        <div class="quantity-controls">
-                            <button type="button" class="quantity-btn minus" onclick="updateQuantity(${index}, ${treatment.quantity - 1})">-</button>
-                            <input type="number" 
-                                   class="quantity-input"
-                                   value="${treatment.quantity}" 
-                                   min="1"
-                                   step="1"
-                                   onchange="updateQuantity(${index}, this.value)"
-                                   readonly>
-                            <button type="button" class="quantity-btn plus" onclick="updateQuantity(${index}, ${treatment.quantity + 1})">+</button>
-                        </div>
-                    </td>
-                    <td>Rs. ${formatPrice(treatment.pricePerUnit)}</td>
-                    <td>Rs. ${formatPrice(treatment.totalPrice)}</td>
-                    <td>
-                        <button type="button" onclick="removeTreatment(${index})" class="remove-btn">Remove</button>
-                    </td>
+                    <td>${treatment}</td>
+                    <td>Rs. ${formatAmount(rowTotal)}</td>
                 </tr>
             `);
-            tbody.append(row);
         });
 
-        // Update total amount
-        let totalAmount = window.treatments.reduce((sum, treatment) => sum + treatment.totalPrice, 0);
-        $('#totalAmount').text(`Rs. ${formatPrice(totalAmount)}`);
-    }
-
-    // Helper function for price formatting with commas
-    function formatPrice(amount) {
-        // Convert to number if it's a string
-        amount = typeof amount === 'string' ? parseFloat(amount) : amount;
-        return amount.toLocaleString('en-IN', {
-            maximumFractionDigits: 0,
-            minimumFractionDigits: 0
-        });
-    }
-
-    // Update billing table
-    function updateBillingTable() {
-        let totalAmount = window.treatments.reduce((sum, treatment) => sum + treatment.totalPrice, 0);
+        // Update all total displays
+        $('#totalAmount').text(`Rs. ${formatAmount(grandTotal)}`);
+        $('#billingTotalAmount').text(`Rs. ${formatAmount(grandTotal)}`);
         
-        // Update total amount displays with commas
-        $('.total-row #totalAmount').text(`Rs. ${formatPrice(totalAmount)}`);
-        $('#totalAmount').text(`Rs. ${formatPrice(totalAmount)}`);
-        calculateNetTotal();
+        // Recalculate net total with current discount
+        calculateNetTotal(grandTotal);
     }
 
-    // Calculate net total
-    function calculateNetTotal() {
-        // Get total amount by removing 'Rs. ' and commas
-        const totalAmountText = $('#totalAmount').text().replace(/Rs\.|,/g, '').trim();
-        const totalAmount = parseFloat(totalAmountText) || 0;
-        
+    // Calculate net total with discount
+    function calculateNetTotal(total) {
         const discountType = $('#discountType').val();
         const discountValue = parseFloat($('#discountValue').val()) || 0;
-
+        
+        // Get total amount as a clean number
+        const totalAmount = parseInt(total.toString().replace(/[^\d]/g, ''));
         let netTotal = totalAmount;
-        if (discountType === 'percentage') {
-            netTotal = totalAmount * (1 - discountValue / 100);
-        } else if (discountType === 'fixed') {
+
+        if (discountType === 'percentage' && discountValue > 0) {
+            // Calculate percentage discount
+            const discountAmount = Math.round((totalAmount * discountValue) / 100);
+            netTotal = totalAmount - discountAmount;
+        } else if (discountType === 'fixed' && discountValue > 0) {
+            // Calculate fixed discount
             netTotal = totalAmount - discountValue;
         }
 
-        // Format net total with commas
-        $('#netTotal').text(`Rs. ${formatPrice(Math.max(0, netTotal))}`);
+        // Debug logs
+        console.log({
+            totalAmount,
+            discountType,
+            discountValue,
+            netTotal
+        });
 
-        // Keep existing visit balance calculation
-        updateVisitBalances();
+        // Format and display the net total
+        $('#netTotal').text(`Rs. ${formatAmount(netTotal)}`);
     }
 
-    // Update quantity function
-    window.updateQuantity = function(index, quantity) {
-        const qty = Math.max(1, parseInt(quantity) || 1); // Ensure minimum of 1
-        if (window.treatments[index]) {
-            // Update quantity and recalculate total price
-            window.treatments[index].quantity = qty;
-            window.treatments[index].totalPrice = qty * window.treatments[index].pricePerUnit;
-            
-            // Update all displays
-            updateTreatmentsTable();
-            updateBillingTable();
-            calculateNetTotal();
-        }
-    };
-
-    // Remove treatment function
-    window.removeTreatment = function(index) {
-        window.treatments.splice(index, 1);
-        updateTreatmentsTable();
-        updateBillingTable();
-        calculateNetTotal();
-    };
+    // Helper function to parse amounts from text
+    function parseAmount(amountText) {
+        // Remove 'Rs. ' and any commas, then parse as float
+        return parseFloat(amountText.replace(/[^0-9.-]+/g, '')) || 0;
+    }
 
     // Handle discount changes
     $('#discountType, #discountValue').on('change input', function() {
-        calculateNetTotal();
+        // Get the current total amount
+        const totalAmount = $('#billingTotalAmount').text();
+        const cleanTotal = parseInt(totalAmount.toString().replace(/[^\d]/g, ''));
+        
+        if (cleanTotal > 0) {
+            calculateNetTotal(cleanTotal);
+        }
     });
 
-    // Visit Section
-    function updateVisitBalances() {
-        const netTotal = parseFloat($('#netTotal').text().replace(/Rs\.|,/g, '')) || 0;
-        let remainingBalance = netTotal;
-
-        $('#visitsTableBody tr').each(function() {
-            const amountPaidInput = $(this).find('.amount-paid-input');
-            const balanceInput = $(this).find('.balance-input');
-            const amountPaid = parseFloat(amountPaidInput.val()) || 0;
-
-            remainingBalance -= amountPaid;
-            balanceInput.val(remainingBalance.toFixed(2));
+    // Handle amount paid changes in visits section
+    $(document).on('input', '.amount-paid-input', function() {
+        const currentRow = $(this).closest('tr');
+        const netTotal = parseInt($('#netTotal').text().replace(/[^\d]/g, '')) || 0;
+        
+        // Calculate total paid in previous rows
+        let totalPaidBefore = 0;
+        currentRow.prevAll('tr').each(function() {
+            const prevPaid = parseInt($(this).find('.amount-paid-input').val()) || 0;
+            totalPaidBefore += prevPaid;
         });
+
+        // Calculate available balance for current row
+        const availableBalance = netTotal - totalPaidBefore;
+        const currentPaid = parseInt($(this).val()) || 0;
+        const currentBalance = availableBalance - currentPaid;
+
+        // Update current row's balance
+        currentRow.find('.balance-input').val(`Rs. ${formatAmount(Math.max(0, currentBalance))}`);
+
+        // Update all subsequent rows' balances
+        let remainingBalance = currentBalance;
+        currentRow.nextAll('tr').each(function() {
+            const nextPaid = parseInt($(this).find('.amount-paid-input').val()) || 0;
+            remainingBalance = remainingBalance - nextPaid;
+            $(this).find('.balance-input').val(`Rs. ${formatAmount(Math.max(0, remainingBalance))}`);
+        });
+    });
+
+    // Initialize first row balance
+    function initializeFirstRowBalance() {
+        const netTotal = parseInt($('#netTotal').text().replace(/[^\d]/g, '')) || 0;
+        const firstRow = $('#visitsTableBody tr').first();
+        const amountPaid = parseInt(firstRow.find('.amount-paid-input').val()) || 0;
+        const balance = netTotal - amountPaid;
+        firstRow.find('.balance-input').val(`Rs. ${formatAmount(balance)}`);
     }
 
-    // Add visit row functionality
+    // Update when net total changes
+    $('#netTotal').on('DOMSubtreeModified', function() {
+        initializeFirstRowBalance();
+    });
+
+    // Initialize on page load
+    $(document).ready(function() {
+        initializeFirstRowBalance();
+    });
+
+    // Add Visit button functionality
     $('#addVisitRow').on('click', function() {
         const visitCount = $('#visitsTableBody tr').length + 1;
-        const suffix = getVisitSuffix(visitCount);
-        
+        let suffix = 'TH';
+        if (visitCount === 1) suffix = 'ST';
+        else if (visitCount === 2) suffix = 'ND';
+        else if (visitCount === 3) suffix = 'RD';
+
+        // Get balance from previous row
+        const previousBalance = $('#visitsTableBody tr:last .balance-input').val();
+        const initialBalance = previousBalance ? previousBalance : `Rs. ${formatAmount(parseInt($('#netTotal').text().replace(/[^\d]/g, '')) || 0)}`;
+
+        // Create new visit row
         const newRow = `
             <tr>
                 <td>${visitCount}<sup>${suffix}</sup> VISIT</td>
-                <td><input type="number" class="amount-paid-input" name="visit_amount[]" step="0.01" min="0"></td>
-                <td><input type="number" class="balance-input" name="visit_balance[]" readonly></td>
+                <td>
+                    <input type="number" 
+                           class="amount-paid-input" 
+                           name="visit_amount[]" 
+                           min="0" 
+                           step="1"
+                           style="text-align: left;">
+                </td>
+                <td>
+                    <input type="text" 
+                           class="balance-input" 
+                           name="visit_balance[]" 
+                           readonly 
+                           value="${initialBalance}">
+                </td>
                 <td><input type="date" class="date-input" name="visit_date[]"></td>
                 <td><input type="text" class="treatment-input" name="visit_treatment[]"></td>
                 <td>
-                    <select name="visit_mode[]" class="mode-input">
+                    <select name="visit_mode[]" class="mode-input" required>
+                        <option value="">Select Payment Mode</option>
                         <option value="cash">Cash</option>
                         <option value="card">Card</option>
                         <option value="insurance">Insurance</option>
                     </select>
+                    <button type="button" class="remove-visit-btn">×</button>
                 </td>
             </tr>
         `;
         
+        // Add new row to table
         $('#visitsTableBody').append(newRow);
-        updateVisitBalances();
     });
 
-    // Helper function for visit number suffix
-    function getVisitSuffix(num) {
-        if (num >= 11 && num <= 13) return 'TH';
-        switch (num % 10) {
-            case 1: return 'ST';
-            case 2: return 'ND';
-            case 3: return 'RD';
-            default: return 'TH';
+    // Add the remove visit handler
+    $(document).on('click', '.remove-visit-btn', function() {
+        // Don't allow removing the first visit
+        if ($('#visitsTableBody tr').length > 1) {
+            $(this).closest('tr').remove();
+            
+            // Renumber the remaining visits and update balances
+            updateVisitNumbersAndBalances();
         }
+    });
+
+    // Add this function to handle visit numbers and balances
+    function updateVisitNumbersAndBalances() {
+        const netTotal = parseInt($('#netTotal').text().replace(/[^\d]/g, '')) || 0;
+        let remainingBalance = netTotal;
+
+        $('#visitsTableBody tr').each(function(index) {
+            // Update visit numbers
+            const count = index + 1;
+            let suffix = 'TH';
+            if (count === 1) suffix = 'ST';
+            else if (count === 2) suffix = 'ND';
+            else if (count === 3) suffix = 'RD';
+            
+            $(this).find('td:first').html(`${count}<sup>${suffix}</sup> VISIT`);
+
+            // Update balances
+            const amountPaid = parseInt($(this).find('.amount-paid-input').val()) || 0;
+            remainingBalance = remainingBalance - amountPaid;
+            $(this).find('.balance-input').val(`Rs. ${formatAmount(Math.max(0, remainingBalance))}`);
+        });
     }
 
-    // Listen for changes in amount paid inputs
-    $(document).on('input', '.amount-paid-input', function() {
-        updateVisitBalances();
+    // Form submission handler
+    $('#patientForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        // Create FormData object
+        const formData = new FormData(this);
+        
+        // Add patient basic data
+        const patientData = {
+            name: $('#patientName').val(),
+            date: $('#date').val(),
+            sector: $('#sector').val(),
+            streetNo: $('#streetNo').val(),
+            houseNo: $('#houseNo').val(),
+            nonIslamabadAddress: $('#nonIslamabadAddress').val(),
+            phone: $('#phone').val(),
+            age: $('#age').val(),
+            gender: $('#gender').val(),
+            occupation: $('#occupation').val(),
+            email: $('#email').val()
+        };
+
+        // Add medical history data
+        const medicalHistory = {
+            heartProblem: $('#heartProblem').is(':checked'),
+            bloodPressure: $('#bloodPressure').is(':checked'),
+            bleedingDisorder: $('#bleedingDisorder').is(':checked'),
+            bloodThinners: $('#bloodThinners').is(':checked'),
+            hepatitis: $('#hepatitis').is(':checked'),
+            diabetes: $('#diabetes').is(':checked'),
+            faintingSpells: $('#faintingSpells').is(':checked'),
+            allergyAnesthesia: $('#allergyAnesthesia').is(':checked'),
+            malignancy: $('#malignancy').is(':checked'),
+            previousSurgery: $('#previousSurgery').is(':checked'),
+            epilepsy: $('#epilepsy').is(':checked'),
+            asthma: $('#asthma').is(':checked'),
+            pregnant: $('#pregnant').is(':checked'),
+            phobia: $('#phobia').is(':checked'),
+            stomach: $('#stomach').is(':checked'),
+            allergy: $('#allergy').is(':checked'),
+            drugAllergy: $('#drugAllergy').is(':checked'),
+            smoker: $('#smoker').is(':checked'),
+            alcoholic: $('#alcoholic').is(':checked'),
+            otherConditions: $('#otherConditions').val()
+        };
+
+        // Get selected teeth
+        const selectedTeeth = [];
+        $('#Spots [data-key].selected').each(function() {
+            selectedTeeth.push($(this).attr('data-key'));
+        });
+        formData.append('selectedTeeth', selectedTeeth.join(','));
+
+        // Add treatments data
+        const treatments = [];
+        $('#treatmentsTableBody tr').each(function() {
+            const row = $(this);
+            treatments.push({
+                name: row.find('td:first').text(),
+                quantity: parseInt(row.find('.quantity-input').val()),
+                pricePerUnit: parseFloat(row.find('td:nth-child(3)').text().replace(/[^0-9.-]+/g, '')),
+                totalPrice: parseFloat(row.find('.total').text().replace(/[^0-9.-]+/g, '')),
+                selectedTeeth: selectedTeeth
+            });
+        });
+
+        // Add diagnosis and treatment advised
+        formData.append('diagnosis', $('#diagnosis').val());
+        formData.append('treatmentAdvised', $('#treatmentAdvised').val());
+
+        // Add JSON stringified data
+        formData.append('patientData', JSON.stringify(patientData));
+        formData.append('medicalHistory', JSON.stringify(medicalHistory));
+        formData.append('treatments', JSON.stringify(treatments));
+
+        // Add billing information
+        formData.append('discountType', $('#discountType').val());
+        formData.append('discountValue', $('#discountValue').val());
+
+        // Visits data is already part of the form fields as arrays:
+        // visit_date[], visit_amount[], visit_treatment[], visit_mode[], visit_balance[]
+
+        // Submit form
+        $.ajax({
+            url: 'save_patient.php',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                console.log('Response:', response);
+                if (response.success) {
+                    alert('Patient data saved successfully!');
+                    window.location.href = 'view_patient.php?id=' + response.patientId;
+                } else {
+                    alert('Error: ' + response.message);
+                    console.error('Error details:', response.details);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+                console.error('Status:', status);
+                console.error('Response:', xhr.responseText);
+                alert('Error saving patient data: ' + error);
+            }
+        });
     });
-
-    // Update visit balances when net total changes
-    $('#netTotal').on('DOMSubtreeModified', function() {
-        updateVisitBalances();
-    });
-
-    // Initialize first visit row
-    const firstVisitRow = `
-        <tr>
-            <td>1<sup>ST</sup> VISIT</td>
-            <td><input type="number" class="amount-paid-input" name="visit_amount[]" step="0.01" min="0"></td>
-            <td><input type="number" class="balance-input" name="visit_balance[]" readonly></td>
-            <td><input type="date" class="date-input" name="visit_date[]"></td>
-            <td><input type="text" class="treatment-input" name="visit_treatment[]"></td>
-            <td>
-                <select name="visit_mode[]" class="mode-input">
-                    <option value="cash">Cash</option>
-                    <option value="card">Card</option>
-                    <option value="insurance">Insurance</option>
-                </select>
-            </td>
-        </tr>
-    `;
-    
-    // Add first visit row if table is empty
-    if ($('#visitsTableBody tr').length === 0) {
-        $('#visitsTableBody').append(firstVisitRow);
-        updateVisitBalances();
-    }
-
-    // Format existing billing amounts
-    $('.treatments-table td:nth-child(4), .treatments-table td:nth-child(5)').each(function() {
-        const amount = parseFloat($(this).text().replace(/[^0-9.-]+/g, ''));
-        if (!isNaN(amount)) {
-            $(this).text(`Rs. ${formatPrice(amount)}`);
-        }
-    });
-
-    // Format existing visit amounts
-    $('.visits-table .amount-paid-input, .visits-table .balance-input').each(function() {
-        const amount = parseFloat($(this).val());
-        if (!isNaN(amount)) {
-            $(this).val(formatPrice(amount));
-        }
-    });
-
-    // Format prices in the treatments table
-    $('.treatments-table td:nth-child(4), .treatments-table td:nth-child(5)').each(function() {
-        const amount = parseFloat($(this).text().replace(/[^0-9.-]+/g, ''));
-        if (!isNaN(amount)) {
-            $(this).text(`Rs. ${formatPrice(amount)}`);
-        }
-    });
-
-    // Format total amount and net total
-    const totalAmount = parseFloat($('#totalAmount').text().replace(/[^0-9.-]+/g, '')) || 0;
-    $('#totalAmount').text(`Rs. ${formatPrice(totalAmount)}`);
-    
-    const netTotal = parseFloat($('#netTotal').text().replace(/[^0-9.-]+/g, '')) || 0;
-    $('#netTotal').text(`Rs. ${formatPrice(netTotal)}`);
 });

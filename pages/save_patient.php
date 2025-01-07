@@ -67,15 +67,15 @@ try {
         // 1. Insert patient
         $stmt = $pdo->prepare("
             INSERT INTO patients (
-                name, date, sector, street_no, house_no, 
+                patient_id, name, date, sector, street_no, house_no, 
                 non_islamabad_address, phone, age, gender, 
                 occupation, email, diagnosis, treatment_advised, 
-                selected_teeth, signature, doctor_signature
+                selected_teeth
             ) VALUES (
-                :name, :date, :sector, :street_no, :house_no,
+                :patient_id, :name, :date, :sector, :street_no, :house_no,
                 :non_islamabad_address, :phone, :age, :gender,
                 :occupation, :email, :diagnosis, :treatment_advised,
-                :selected_teeth, :signature, :doctor_signature
+                :selected_teeth
             )
         ");
 
@@ -91,6 +91,7 @@ try {
         }
 
         $stmt->execute([
+            'patient_id' => $_POST['patientId'] ?? '',
             'name' => $patientData['name'],
             'date' => $patientData['date'],
             'sector' => $patientData['sector'],
@@ -104,9 +105,7 @@ try {
             'email' => $patientData['email'],
             'diagnosis' => $_POST['diagnosis'] ?? null,
             'treatment_advised' => $_POST['treatmentAdvised'] ?? null,
-            'selected_teeth' => $selectedTeeth,
-            'signature' => $patientSignature,
-            'doctor_signature' => $doctorSignature
+            'selected_teeth' => $selectedTeeth
         ]);
 
         $patientId = $pdo->lastInsertId();
@@ -214,28 +213,31 @@ try {
         }
 
         // Insert visits
-        if (!empty($_POST['visits'])) {
-            $visits = json_decode($_POST['visits'], true);
-            $stmt = $pdo->prepare("
-                INSERT INTO visits (
-                    patient_id,
-                    visit_date,
-                    treatment_done,
-                    visit_amount,
-                    visit_mode,
-                    balance
-                ) VALUES (?, ?, ?, ?, ?, ?)
-            ");
-
-            foreach ($visits as $visit) {
-                if (!empty($visit['date'])) {
+        if (isset($_POST['visit_date'])) {
+            for ($i = 0; $i < count($_POST['visit_date']); $i++) {
+                if (!empty($_POST['visit_date'][$i])) {
+                    $stmt = $pdo->prepare("
+                        INSERT INTO visits (
+                            patient_id, 
+                            visit_date, 
+                            treatment_done,
+                            visit_amount, 
+                            visit_mode, 
+                            balance
+                        ) VALUES (?, ?, ?, ?, ?, ?)
+                    ");
+                    
+                    // Clean amount and balance values
+                    $visitAmount = str_replace(['Rs. ', ','], '', $_POST['visit_amount'][$i]);
+                    $balance = str_replace(['Rs. ', ','], '', $_POST['visit_balance'][$i]);
+                    
                     $stmt->execute([
                         $patientId,
-                        $visit['date'],
-                        $visit['treatment'],
-                        $visit['amount'],
-                        $visit['mode'],
-                        $visit['balance']
+                        $_POST['visit_date'][$i],
+                        $_POST['visit_treatment'][$i],
+                        floatval($visitAmount),
+                        $_POST['visit_mode'][$i],
+                        floatval($balance)
                     ]);
                 }
             }

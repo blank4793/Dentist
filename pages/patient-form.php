@@ -389,6 +389,55 @@ if (isset($patientId)) {
         .history-row:hover {
             background-color: #f0f0f0;
         }
+
+        .treatment-select-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            width: 100%;  /* Ensure full width */
+            white-space: nowrap;  /* Prevent text wrapping */
+            padding-right: 5px;  /* Add a little padding */
+        }
+
+        .patient-id-section {
+            margin: 20px auto;
+            max-width: 200px;  /* Made smaller */
+            text-align: center;
+        }
+
+        .patient-id-group {
+            margin-bottom: 20px;  /* Reduced margin */
+        }
+
+        .patient-id-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;  /* Reduced margin */
+            color: #2c3e50;
+            font-size: 1em;  /* Slightly smaller font */
+        }
+
+        .patient-id-input {
+            width: 150px;  /* Made input field smaller */
+            padding: 8px;
+            text-align: center;
+            font-size: 1em;
+            border: 2px solid #3498db;
+            border-radius: 4px;
+            margin: 0 auto;
+        }
+
+        .patient-id-input:focus {
+            outline: none;
+            border-color: #2980b9;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+
+        .center-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -408,6 +457,20 @@ if (isset($patientId)) {
                 <?php endif; ?>
 
                 <form id="patientForm" method="POST" action="save_patient.php">
+                    <!-- Modified Patient ID section -->
+                    <div class="patient-id-section">
+                        <div class="patient-id-group">
+                            <label for="patientId">Patient ID</label>
+                            <input type="text" 
+                                   class="patient-id-input" 
+                                   id="patientId" 
+                                   name="patientId" 
+                                   pattern="[A-Za-z0-9]+" 
+                                   title="Enter letters and numbers only"
+                                   required>
+                        </div>
+                    </div>
+
                     <!-- Personal Information -->
                     <div class="personal-info">
                         <div class="form-row name-date">
@@ -625,7 +688,7 @@ if (isset($patientId)) {
                         <h3>TREATMENT</h3>
                         <div class="form-row">
                             <div class="form-group treatment-select-group">
-                                <label for="treatmentSelect">Select Treatment:</label>
+                                <label for="treatmentSelect">SELECT TREATMENT</label>
                                 <select id="treatmentSelect" name="treatment" class="treatment-dropdown">
                                     <option value="">Select Treatment</option>
                                     <option value="consultation">Consultation (Rs. 2500)</option>
@@ -679,10 +742,13 @@ if (isset($patientId)) {
                             <tfoot>
                                 <tr>
                                     <td colspan="3" style="text-align: right;"><strong>Total Amount:</strong></td>
-                                    <td colspan="2"><span id="totalAmount" class="amount">Rs. 0</span></td>
+                                    <td colspan="2"><span id="totalAmount">Rs. 0</span></td>
                                 </tr>
                             </tfoot>
                         </table>
+
+                        <!-- Hidden input for treatments data -->
+                        <input type="hidden" id="treatmentsInput" name="treatments" value="">
                     </div>
 
                     <!-- Billing Section -->
@@ -693,8 +759,6 @@ if (isset($patientId)) {
                                 <thead>
                                     <tr>
                                         <th>Treatment</th>
-                                        <th>Quantity</th>
-                                        <th>Price Per Unit</th>
                                         <th>Total Amount</th>
                                     </tr>
                                 </thead>
@@ -703,11 +767,11 @@ if (isset($patientId)) {
                                 </tbody>
                                 <tfoot>
                                     <tr class="total-row">
-                                        <td colspan="3">TOTAL AMOUNT</td>
-                                        <td><span id="totalAmount">Rs.0.00</span></td>
+                                        <td>TOTAL AMOUNT</td>
+                                        <td><span id="billingTotalAmount">Rs.0.00</span></td>
                                     </tr>
                                     <tr class="discount-row">
-                                        <td colspan="3">
+                                        <td>
                                             DISCOUNT
                                             <select id="discountType" name="discountType">
                                                 <option value="percentage">Percentage (%)</option>
@@ -724,7 +788,7 @@ if (isset($patientId)) {
                                         </td>
                                     </tr>
                                     <tr class="net-total-row">
-                                        <td colspan="3">NET TOTAL</td>
+                                        <td>NET TOTAL</td>
                                         <td><span id="netTotal">Rs.0.00</span></td>
                                     </tr>
                                 </tfoot>
@@ -750,8 +814,20 @@ if (isset($patientId)) {
                                 <tbody id="visitsTableBody">
                                     <tr>
                                         <td>1<sup>ST</sup> VISIT</td>
-                                        <td><input type="number" class="amount-paid-input" name="visit_amount[]" step="0.01" min="0"></td>
-                                        <td><input type="number" class="balance-input" name="visit_balance[]" readonly></td>
+                                        <td>
+                                            <input type="number" 
+                                                   class="amount-paid-input" 
+                                                   name="visit_amount[]" 
+                                                   min="0" 
+                                                   step="1"
+                                                   style="text-align: left;">
+                                        </td>
+                                        <td>
+                                            <input type="text" 
+                                                   class="balance-input" 
+                                                   name="visit_balance[]" 
+                                                   readonly>
+                                        </td>
                                         <td><input type="date" class="date-input" name="visit_date[]"></td>
                                         <td><input type="text" class="treatment-input" name="visit_treatment[]"></td>
                                         <td>

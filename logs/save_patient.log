@@ -143,3 +143,299 @@ Data: Array
     [selectedTeeth_type] => array
 )
 
+2025-01-07 23:39:31 - Starting patient save process
+2025-01-07 23:39:31 - Error: Patient data is missing
+2025-01-07 23:39:31 - Stack trace: #0 {main}
+2025-01-07 23:43:08 - Starting patient save process
+2025-01-07 23:43:08 - Received data:
+Data: Array
+(
+    [patientData] => Array
+        (
+            [name] => wassi abbas
+            [date] => 2025-01-08
+            [sector] => dasd
+            [streetNo] => dasda
+            [houseNo] => dasda
+            [nonIslamabadAddress] => adasd
+            [phone] => 03461571792
+            [age] => 30
+            [gender] => Male
+            [occupation] => dasdas
+            [email] => wassiabbad@gmail.com
+        )
+
+    [treatments] => Array
+        (
+            [0] => Array
+                (
+                    [name] => Ext
+                    [quantity] => 2
+                    [pricePerUnit] => 0.9
+                    [totalPrice] => 0.18
+                    [selectedTeeth] => Array
+                        (
+                            [0] => 44
+                            [1] => 11
+                        )
+
+                )
+
+        )
+
+    [billing] => 
+)
+
+2025-01-07 23:43:08 - Processing treatments:
+Data: Array
+(
+    [treatments] => Array
+        (
+            [0] => Array
+                (
+                    [name] => Ext
+                    [quantity] => 2
+                    [pricePerUnit] => 0.9
+                    [totalPrice] => 0.18
+                    [selectedTeeth] => Array
+                        (
+                            [0] => 44
+                            [1] => 11
+                        )
+
+                )
+
+        )
+
+    [first_treatment_teeth] => Array
+        (
+            [0] => 44
+            [1] => 11
+        )
+
+    [teeth_type] => array
+)
+
+2025-01-07 23:43:08 - Processing treatment 1
+Data: Array
+(
+    [treatment] => Array
+        (
+            [name] => Ext
+            [quantity] => 2
+            [pricePerUnit] => 0.9
+            [totalPrice] => 0.18
+            [selectedTeeth] => Array
+                (
+                    [0] => 44
+                    [1] => 11
+                )
+
+        )
+
+    [selectedTeeth] => Array
+        (
+            [0] => 44
+            [1] => 11
+        )
+
+    [selectedTeeth_type] => array
+)
+
+2025-01-08 00:06:13 - Starting patient save process
+2025-01-08 00:06:13 - Received data:
+Data: Array
+(
+    [patientData] => Array
+        (
+            [name] => dsfsd
+            [date] => 2025-01-08
+            [sector] => fsdfsd
+            [streetNo] => fsdfsd
+            [houseNo] => fsdfsd
+            [nonIslamabadAddress] => fsdfsd
+            [phone] => 03461571792
+            [age] => 30
+            [gender] => Male
+            [occupation] => fsdfsdfd
+            [email] => wassiabbad@gmail.com
+        )
+
+    [treatments] => Array
+        (
+            [0] => Array
+                (
+                    [name] => Scaling and polishing
+                    [quantity] => 2
+                    [pricePerUnit] => 0.12
+                    [totalPrice] => 0.24
+                    [selectedTeeth] => Array
+                        (
+                            [0] => 14
+                            [1] => 18
+                        )
+
+                )
+
+        )
+
+    [billing] => 
+)
+
+2025-01-08 00:06:13 - Processing treatments:
+Data: Array
+(
+    [treatments] => Array
+        (
+            [0] => Array
+                (
+                    [name] => Scaling and polishing
+                    [quantity] => 2
+                    [pricePerUnit] => 0.12
+                    [totalPrice] => 0.24
+                    [selectedTeeth] => Array
+                        (
+                            [0] => 14
+                            [1] => 18
+                        )
+
+                )
+
+        )
+
+    [first_treatment_teeth] => Array
+        (
+            [0] => 14
+            [1] => 18
+        )
+
+    [teeth_type] => array
+)
+
+2025-01-08 00:06:13 - Processing treatment 1
+Data: Array
+(
+    [treatment] => Array
+        (
+            [name] => Scaling and polishing
+            [quantity] => 2
+            [pricePerUnit] => 0.12
+            [totalPrice] => 0.24
+            [selectedTeeth] => Array
+                (
+                    [0] => 14
+                    [1] => 18
+                )
+
+        )
+
+    [selectedTeeth] => Array
+        (
+            [0] => 14
+            [1] => 18
+        )
+
+    [selectedTeeth_type] => array
+)
+
+2025-01-08 00:36:05 - Starting patient save process
+2025-01-08 00:36:05 - Received data:
+Data: Array
+(
+    [patientData] => Array
+        (
+            [name] => wassi
+            [date] => 2025-01-08
+            [sector] => fsdfsd
+            [streetNo] => fsdfsd
+            [houseNo] => fsdfsd
+            [nonIslamabadAddress] => fsdfssd
+            [phone] => 03461571792
+            [age] => 30
+            [gender] => Male
+            [occupation] => fsdfsd
+            [email] => wassiabbad@gmail.com
+        )
+
+    [treatments] => Array
+        (
+            [0] => Array
+                (
+                    [name] => Ext
+                    [quantity] => 2
+                    [pricePerUnit] => 0.12
+                    [totalPrice] => 0.24
+                    [selectedTeeth] => Array
+                        (
+                            [0] => 28
+                            [1] => 25
+                            [2] => 18
+                        )
+
+                )
+
+        )
+
+    [billing] => 
+)
+
+2025-01-08 00:36:05 - Processing treatments:
+Data: Array
+(
+    [treatments] => Array
+        (
+            [0] => Array
+                (
+                    [name] => Ext
+                    [quantity] => 2
+                    [pricePerUnit] => 0.12
+                    [totalPrice] => 0.24
+                    [selectedTeeth] => Array
+                        (
+                            [0] => 28
+                            [1] => 25
+                            [2] => 18
+                        )
+
+                )
+
+        )
+
+    [first_treatment_teeth] => Array
+        (
+            [0] => 28
+            [1] => 25
+            [2] => 18
+        )
+
+    [teeth_type] => array
+)
+
+2025-01-08 00:36:05 - Processing treatment 1
+Data: Array
+(
+    [treatment] => Array
+        (
+            [name] => Ext
+            [quantity] => 2
+            [pricePerUnit] => 0.12
+            [totalPrice] => 0.24
+            [selectedTeeth] => Array
+                (
+                    [0] => 28
+                    [1] => 25
+                    [2] => 18
+                )
+
+        )
+
+    [selectedTeeth] => Array
+        (
+            [0] => 28
+            [1] => 25
+            [2] => 18
+        )
+
+    [selectedTeeth_type] => array
+)
+
