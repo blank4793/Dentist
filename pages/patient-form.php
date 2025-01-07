@@ -626,33 +626,38 @@ if (isset($patientId)) {
                         <div class="form-row">
                             <div class="form-group treatment-select-group">
                                 <label for="treatmentSelect">Select Treatment:</label>
-                                <select id="treatmentSelect" name="treatment">
+                                <select id="treatmentSelect" name="treatment" class="treatment-dropdown">
                                     <option value="">Select Treatment</option>
-                                    <option value="consultation">Consultation (Rs. 1000)</option>
-                                    <option value="radiograph">Radiograph (Rs. 1500)</option>
-                                    <option value="fillingD">Filling Direct (Rs. 3000)</option>
-                                    <option value="fillingI">Filling Indirect (Rs. 2500)</option>
-                                    <option value="rct">RCT (Rs. 15000)</option>
-                                    <option value="pfmCrownD">PFM Crown Direct (Rs. 12000)</option>
-                                    <option value="pfmCrownI">PFM Crown Indirect (Rs. 10000)</option>
-                                    <option value="zirconia">Zirconia (Rs. 20000)</option>
-                                    <option value="extSimple">Extraction Simple (Rs. 2000)</option>
-                                    <option value="extComp">Extraction Complex (Rs. 4000)</option>
-                                    <option value="acrylicDent">Acrylic Denture (Rs. 25000)</option>
-                                    <option value="ccPlate">CC Plate (Rs. 8000)</option>
-                                    <option value="completeDenture">Complete Denture (Rs. 35000)</option>
-                                    <option value="flexideDenture">Flexide Denture (Rs. 40000)</option>
-                                    <option value="bridgeD">Bridge Direct (Rs. 30000)</option>
-                                    <option value="bridgeI">Bridge Indirect (Rs. 25000)</option>
-                                    <option value="implant">Implant (Rs. 50000)</option>
-                                    <option value="laserTeethWhitening">Laser Teeth Whitening (Rs. 15000)</option>
-                                    <option value="postAndCore">Post and Core (Rs. 8000)</option>
-                                    <option value="peadFilling">Pead Filling (Rs. 2500)</option>
-                                    <option value="peadExt">Pead Extraction (Rs. 2000)</option>
-                                    <option value="pulpotomy">Pulpotomy (Rs. 5000)</option>
-                                    <option value="toothJewels">Tooth Jewels (Rs. 3000)</option>
-                                    <option value="scalingAndPolishing">Scaling and Polishing (Rs. 3500)</option>
-                                    <option value="rootPlanning">Root Planning (Rs. 5000)</option>
+                                    <option value="consultation">Consultation (Rs. 2500)</option>
+                                    <option value="radiograph">Radiograph (Rs. 500)</option>
+                                    <option value="fillingD">Filling (D) (Rs. 8000)</option>
+                                    <option value="pulpotomy">Pulpotomy (Rs. 9000)</option>
+                                    <option value="rct">RCT (Rs. 18000)</option>
+                                    <option value="pfmCrownD">PFM Crown (D) (Rs. 22000)</option>
+                                    <option value="postAndCore">Post & Core build up (Rs. 8500)</option>
+                                    <option value="zirconia">Zirconia (Rs. 26000)</option>
+                                    <option value="extSimple">Ext (simple) (Rs. 9000)</option>
+                                    <option value="extComp">Ext (Comp) (Rs. 12000)</option>
+                                    <option value="impaction">Impaction (Rs. 35000)</option>
+                                    <option value="minorSurgery">Minor Surgery (Rs. 8000)</option>
+                                    <option value="scalingPolishing">Scaling and polishing (Rs. 12000)</option>
+                                    <option value="rootPlanning">Root Planning (Rs. 10000)</option>
+                                    <option value="veneers">U Veneers (Rs. 12000)</option>
+                                    <option value="acrylicDent">Acrylic Dent U/L (Rs. 7000)</option>
+                                    <option value="ccPlate">C.C Plate U/L per arch (Rs. 75000)</option>
+                                    <option value="completeDenture">Complete Denture U/L (Rs. 80000)</option>
+                                    <option value="flexideDenture">Flexide Denture U/L (Rs. 70000)</option>
+                                    <option value="bridgeWork">Bridge Work (PFM) Per tooth (Rs. 18000)</option>
+                                    <option value="prophyPolish">Prophy Polish (Rs. 10000)</option>
+                                    <option value="implant">Implant Per tooth (Rs. 125000)</option>
+                                    <option value="laserTeethWhitening">Laser Teeth Whitening (Rs. 28000)</option>
+                                    <option value="peadFilling">Pead Filling (Rs. 4500)</option>
+                                    <option value="peadExt">Pead Ext (Rs. 4500)</option>
+                                    <option value="toothJewels">Tooth Jewels (Rs. 6000)</option>
+                                    <option value="wisdomToothExt">Wisdom Tooth Ext (simple) (Rs. 12000)</option>
+                                    <option value="eMaxCrowns">E-Max Crowns (Rs. 40000)</option>
+                                    <option value="completeDentureSoft">Complete denture (soft liner) U/L (Rs. 115000)</option>
+                                    <option value="digitalImpressions">Digital Impressions (Rs. 5000)</option>
                                 </select>
                             </div>
                         </div>
@@ -660,16 +665,22 @@ if (isset($patientId)) {
                         <table class="selected-treatments-table">
                             <thead>
                                 <tr>
-                                    <th width="30%">Treatment</th>
-                                    <th width="15%">Quantity</th>
-                                    <th width="20%">Price Per Unit</th>
-                                    <th width="20%">Total Price</th>
-                                    <th width="15%">Action</th>
+                                    <th>Treatment</th>
+                                    <th>Quantity</th>
+                                    <th>Price/Unit</th>
+                                    <th>Total</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody id="selectedTreatmentsList">
-                                <!-- Selected treatments will appear here -->
+                                <!-- Treatments will be added here -->
                             </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3">Total Amount</td>
+                                    <td colspan="2"><span id="totalAmount">Rs. 0.00</span></td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
 

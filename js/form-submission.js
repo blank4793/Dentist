@@ -72,9 +72,13 @@ $(document).ready(function() {
         return errors;
     }
 
-    // Form validation and submission
+    // Form submission handling
     $('#patientForm').on('submit', function(e) {
         e.preventDefault();
+        console.log('Form submission started');
+
+        // Show loading state
+        $('.submit-btn').prop('disabled', true).text('Submitting...');
 
         // Get signature data
         const patientSignature = document.getElementById('patientSignatureData').value;
@@ -84,15 +88,58 @@ $(document).ready(function() {
         const formData = {
             patientData: {
                 name: $('#patientName').val(),
-                // ... other patient fields ...
-                signature: patientSignature,
-                doctor_signature: doctorSignature
+                date: $('#date').val(),
+                sector: $('#sector').val(),
+                streetNo: $('#streetNo').val(),
+                houseNo: $('#houseNo').val(),
+                nonIslamabadAddress: $('#nonIslamabadAddress').val(),
+                phone: $('#phone').val(),
+                age: $('#age').val(),
+                gender: $('#gender').val(),
+                occupation: $('#occupation').val(),
+                email: $('#email').val()
             },
-            // ... other form data ...
+            medicalHistory: {
+                heartProblem: $('#heartProblem').is(':checked'),
+                bloodPressure: $('#bloodPressure').is(':checked'),
+                bleedingDisorder: $('#bleedingDisorder').is(':checked'),
+                bloodThinners: $('#bloodThinners').is(':checked'),
+                hepatitis: $('#hepatitis').is(':checked'),
+                diabetes: $('#diabetes').is(':checked'),
+                faintingSpells: $('#faintingSpells').is(':checked'),
+                allergyAnesthesia: $('#allergyAnesthesia').is(':checked'),
+                malignancy: $('#malignancy').is(':checked'),
+                previousSurgery: $('#previousSurgery').is(':checked'),
+                epilepsy: $('#epilepsy').is(':checked'),
+                asthma: $('#asthma').is(':checked'),
+                pregnant: $('#pregnant').is(':checked'),
+                phobia: $('#phobia').is(':checked'),
+                stomach: $('#stomach').is(':checked'),
+                allergy: $('#allergy').is(':checked'),
+                drugAllergy: $('#drugAllergy').is(':checked'),
+                smoker: $('#smoker').is(':checked'),
+                alcoholic: $('#alcoholic').is(':checked'),
+                otherConditions: $('#otherConditions').val()
+            },
+            treatments: window.treatments || [],
+            selectedTeeth: $('#selectedTeethInput').val(),
+            diagnosis: $('#diagnosis').val(),
+            treatmentAdvised: $('#treatmentAdvised').val()
         };
 
-        // Show loading state
-        $('.submit-btn').prop('disabled', true).text('Submitting...');
+        console.log('Form data collected:', formData);
+
+        // Add this to your form submission data
+        const visits = [];
+        $('#visitsTableBody tr').each(function() {
+            visits.push({
+                date: $(this).find('.date-input').val(),
+                treatment: $(this).find('.treatment-input').val(),
+                amount: parseFloat($(this).find('.amount-paid-input').val()) || 0,
+                mode: $(this).find('.mode-input').val(),
+                balance: parseFloat($(this).find('.balance-input').val()) || 0
+            });
+        });
 
         // Submit the form
         $.ajax({
@@ -102,25 +149,30 @@ $(document).ready(function() {
                 patientData: JSON.stringify(formData.patientData),
                 medicalHistory: JSON.stringify(formData.medicalHistory),
                 treatments: JSON.stringify(formData.treatments),
-                visits: JSON.stringify(formData.visits),
-                billing: JSON.stringify(formData.billing),
                 selectedTeeth: formData.selectedTeeth,
+                diagnosis: formData.diagnosis,
+                treatmentAdvised: formData.treatmentAdvised,
                 patient_signature_data: patientSignature,
-                doctor_signature_data: doctorSignature
+                doctor_signature_data: doctorSignature,
+                visits: JSON.stringify(visits),
+                discountType: $('#discountType').val(),
+                discountValue: $('#discountValue').val()
             },
             success: function(response) {
+                console.log('Server response:', response);
                 if (response.success) {
                     alert('Patient data saved successfully!');
                     window.location.href = `view_patient.php?id=${response.patientId}`;
                 } else {
+                    console.error('Server error:', response.message);
                     alert('Error: ' + response.message);
                     $('.submit-btn').prop('disabled', false).text('Submit Registration');
                 }
             },
             error: function(xhr, status, error) {
+                console.error('AJAX error:', {xhr, status, error});
                 alert('Error submitting form. Please try again.');
                 $('.submit-btn').prop('disabled', false).text('Submit Registration');
-                console.error(error);
             }
         });
     });
@@ -238,62 +290,62 @@ $(document).ready(function() {
     // Treatment Section
     window.treatments = []; // Store treatments globally
 
-    // Treatment prices mapping
-    const treatmentPrices = {
-        'consultation': { name: 'Consultation', price: 1000 },
-        'radiograph': { name: 'Radiograph', price: 1500 },
-        'fillingD': { name: 'Filling Direct', price: 3000 },
-        'fillingI': { name: 'Filling Indirect', price: 2500 },
-        'rct': { name: 'RCT', price: 15000 },
-        'pfmCrownD': { name: 'PFM Crown Direct', price: 12000 },
-        'pfmCrownI': { name: 'PFM Crown Indirect', price: 10000 },
-        'zirconia': { name: 'Zirconia', price: 20000 },
-        'extSimple': { name: 'Extraction Simple', price: 2000 },
-        'extComp': { name: 'Extraction Complex', price: 4000 },
-        'acrylicDent': { name: 'Acrylic Denture', price: 25000 },
-        'ccPlate': { name: 'CC Plate', price: 8000 },
-        'completeDenture': { name: 'Complete Denture', price: 35000 },
-        'flexideDenture': { name: 'Flexide Denture', price: 40000 },
-        'bridgeD': { name: 'Bridge Direct', price: 30000 },
-        'bridgeI': { name: 'Bridge Indirect', price: 25000 },
-        'implant': { name: 'Implant', price: 50000 },
-        'laserTeethWhitening': { name: 'Laser Teeth Whitening', price: 15000 },
-        'postAndCore': { name: 'Post and Core', price: 8000 },
-        'peadFilling': { name: 'Pediatric Filling', price: 2500 },
-        'peadExt': { name: 'Pediatric Extraction', price: 2000 }
-    };
-
     // Treatment selection handling
-    $('#treatmentSelect').on('change', function() {
+    $('#treatmentSelect').change(function() {
         const selectedValue = $(this).val();
         if (!selectedValue) return;
 
-        const selectedText = $(this).find('option:selected').text();
-        const treatmentName = selectedText.split('(')[0].trim();
-        const price = treatmentPrices[selectedValue].price;
+        // Get the selected option text and price
+        const selectedOption = $(this).find('option:selected');
+        const optionText = selectedOption.text();
+        const priceMatch = optionText.match(/Rs\. (\d+)/);
+        const price = priceMatch ? parseFloat(priceMatch[1]) : 0;
+        const treatmentName = optionText.split('(Rs.')[0].trim();
 
-        // Create new treatment
-        const treatment = {
+        // Get selected teeth
+        const selectedTeethArray = $('#selectedTeethInput').val() ? 
+            $('#selectedTeethInput').val().split(',').filter(Boolean) : 
+            [];
+
+        // Create new treatment object
+        const newTreatment = {
+            id: selectedValue,
             name: treatmentName,
             quantity: 1,
             pricePerUnit: price,
             totalPrice: price,
-            // Convert to array if it's a comma-separated string
-            selectedTeeth: $('#selectedTeethInput').val().split(',').filter(Boolean)
+            selectedTeeth: selectedTeethArray
         };
 
-        // Add to treatments array
-        window.treatments.push(treatment);
+        // Initialize treatments array if it doesn't exist
+        if (!window.treatments) {
+            window.treatments = [];
+        }
+
+        // Add the new treatment
+        window.treatments.push(newTreatment);
 
         // Update displays
         updateTreatmentsTable();
         updateBillingTable();
+        calculateNetTotal();
 
         // Reset select
         $(this).val('');
     });
 
-    // Update treatments table
+    // Add this function to format the treatment display
+    function formatTreatmentDisplay(treatment) {
+        let display = treatment.name;
+        if (treatment.selectedTeeth && treatment.selectedTeeth.length > 0) {
+            if (treatment.name.includes('Per tooth') || treatment.name.includes('U/L')) {
+                display += ` (${treatment.selectedTeeth.join(', ')})`;
+            }
+        }
+        return display;
+    }
+
+    // Update the treatments table display
     function updateTreatmentsTable() {
         const tbody = $('#selectedTreatmentsList');
         tbody.empty();
@@ -301,7 +353,7 @@ $(document).ready(function() {
         window.treatments.forEach((treatment, index) => {
             const row = $(`
                 <tr>
-                    <td>${treatment.name}</td>
+                    <td>${formatTreatmentDisplay(treatment)}</td>
                     <td>
                         <input type="number" value="${treatment.quantity}" min="1" 
                                onchange="updateQuantity(${index}, this.value)">
@@ -317,41 +369,32 @@ $(document).ready(function() {
             `);
             tbody.append(row);
         });
+
+        // Update hidden input with treatments data
+        $('#treatmentsInput').val(JSON.stringify(window.treatments));
     }
 
     // Update billing table
     function updateBillingTable() {
-        const tbody = $('#billingList');
-        tbody.empty();
-
         let totalAmount = 0;
         window.treatments.forEach(treatment => {
             totalAmount += treatment.totalPrice;
-            const row = $(`
-                <tr>
-                    <td>${treatment.name}</td>
-                    <td>${treatment.quantity}</td>
-                    <td>Rs. ${treatment.pricePerUnit.toFixed(2)}</td>
-                    <td>Rs. ${treatment.totalPrice.toFixed(2)}</td>
-                </tr>
-            `);
-            tbody.append(row);
         });
 
         $('#totalAmount').text(`Rs. ${totalAmount.toFixed(2)}`);
         calculateNetTotal();
     }
 
-    // Calculate net total with discount
+    // Calculate net total
     function calculateNetTotal() {
-        const totalAmount = parseFloat($('#totalAmount').text().replace(/Rs\.|,/g, '')) || 0;
+        const totalAmount = parseFloat($('#totalAmount').text().replace('Rs. ', '')) || 0;
         const discountType = $('#discountType').val();
         const discountValue = parseFloat($('#discountValue').val()) || 0;
 
         let netTotal = totalAmount;
         if (discountType === 'percentage') {
             netTotal = totalAmount * (1 - discountValue / 100);
-        } else {
+        } else if (discountType === 'fixed') {
             netTotal = totalAmount - discountValue;
         }
 
@@ -359,19 +402,22 @@ $(document).ready(function() {
         updateVisitBalances();
     }
 
-    // Global functions for treatment management
+    // Update quantity function
     window.updateQuantity = function(index, quantity) {
         const qty = parseInt(quantity) || 1;
         window.treatments[index].quantity = qty;
         window.treatments[index].totalPrice = qty * window.treatments[index].pricePerUnit;
         updateTreatmentsTable();
         updateBillingTable();
+        calculateNetTotal();
     };
 
+    // Remove treatment function
     window.removeTreatment = function(index) {
         window.treatments.splice(index, 1);
         updateTreatmentsTable();
         updateBillingTable();
+        calculateNetTotal();
     };
 
     // Handle discount changes

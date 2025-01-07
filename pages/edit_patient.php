@@ -361,6 +361,36 @@ try {
                                     <label for="treatmentSelect">SELECT TREATMENT:</label>
                                     <select id="treatmentSelect" name="treatment" class="treatment-dropdown">
                                         <option value="">Select Treatment</option>
+                                        <option value="consultation">Consultation (Rs. 2500)</option>
+                                        <option value="radiograph">Radiograph (Rs. 500)</option>
+                                        <option value="fillingD">Filling (D) (Rs. 8000)</option>
+                                        <option value="pulpotomy">Pulpotomy (Rs. 9000)</option>
+                                        <option value="rct">RCT (Rs. 18000)</option>
+                                        <option value="pfmCrownD">PFM Crown (D) (Rs. 22000)</option>
+                                        <option value="postAndCore">Post & Core build up (Rs. 8500)</option>
+                                        <option value="zirconia">Zirconia (Rs. 26000)</option>
+                                        <option value="extSimple">Ext (simple) (Rs. 9000)</option>
+                                        <option value="extComp">Ext (Comp) (Rs. 12000)</option>
+                                        <option value="impaction">Impaction (Rs. 35000)</option>
+                                        <option value="minorSurgery">Minor Surgery (Rs. 8000)</option>
+                                        <option value="scalingPolishing">Scaling and polishing (Rs. 12000)</option>
+                                        <option value="rootPlanning">Root Planning (Rs. 10000)</option>
+                                        <option value="veneers">U Veneers (Rs. 12000)</option>
+                                        <option value="acrylicDent">Acrylic Dent U/L (Rs. 7000)</option>
+                                        <option value="ccPlate">C.C Plate U/L per arch (Rs. 75000)</option>
+                                        <option value="completeDenture">Complete Denture U/L (Rs. 80000)</option>
+                                        <option value="flexideDenture">Flexide Denture U/L (Rs. 70000)</option>
+                                        <option value="bridgeWork">Bridge Work (PFM) Per tooth (Rs. 18000)</option>
+                                        <option value="prophyPolish">Prophy Polish (Rs. 10000)</option>
+                                        <option value="implant">Implant Per tooth (Rs. 125000)</option>
+                                        <option value="laserTeethWhitening">Laser Teeth Whitening (Rs. 28000)</option>
+                                        <option value="peadFilling">Pead Filling (Rs. 4500)</option>
+                                        <option value="peadExt">Pead Ext (Rs. 4500)</option>
+                                        <option value="toothJewels">Tooth Jewels (Rs. 6000)</option>
+                                        <option value="wisdomToothExt">Wisdom Tooth Ext (simple) (Rs. 12000)</option>
+                                        <option value="eMaxCrowns">E-Max Crowns (Rs. 40000)</option>
+                                        <option value="completeDentureSoft">Complete denture (soft liner) U/L (Rs. 115000)</option>
+                                        <option value="digitalImpressions">Digital Impressions (Rs. 5000)</option>
                                     </select>
                                     <button type="button" id="addTreatment" class="add-treatment-btn">Add Treatment</button>
                                 </div>

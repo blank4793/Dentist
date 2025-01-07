@@ -52,21 +52,17 @@ try {
     // Debug log
     error_log("Treatments fetched: " . print_r($treatments, true));
 
-    // Get visits
+    // Get billing information with calculated fields
     $stmt = $pdo->prepare("
-        SELECT * FROM visits 
-        WHERE patient_id = ? 
-        ORDER BY visit_date DESC
+        SELECT b.*, 
+               CASE 
+                   WHEN b.discount_type = 'percentage' THEN (SELECT SUM(total_price) FROM dental_treatments WHERE patient_id = ?) * b.discount_value / 100
+                   ELSE b.discount_value 
+               END as calculated_discount
+        FROM billing b 
+        WHERE b.patient_id = ?
     ");
-    $stmt->execute([$patientId]);
-    $visits = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Get billing information separately
-    $stmt = $pdo->prepare("
-        SELECT * FROM billing 
-        WHERE patient_id = ?
-    ");
-    $stmt->execute([$patientId]);
+    $stmt->execute([$patientId, $patientId]);
     $billing = $stmt->fetch(PDO::FETCH_ASSOC);
 
     // Debug log
@@ -96,6 +92,15 @@ try {
             error_log("Warning: Invalid discount value in billing: " . $billing['discount_value']);
         }
     }
+
+    // Get visits with proper ordering
+    $stmt = $pdo->prepare("
+        SELECT * FROM visits 
+        WHERE patient_id = ? 
+        ORDER BY visit_date DESC, id DESC
+    ");
+    $stmt->execute([$patientId]);
+    $visits = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (Exception $e) {
     $error = $e->getMessage();
@@ -682,12 +687,6 @@ try {
                         <!-- Treatments -->
                         <div class="section">
                             <h3>Treatments</h3>
-                            <?php
-                            // Debug output (remove in production)
-                            if (empty($treatments)) {
-                                error_log("No treatments found for patient ID: $patientId");
-                            }
-                            ?>
                             <?php if (!empty($treatments)): ?>
                                 <table class="treatments-table">
                                     <thead>
@@ -714,35 +713,34 @@ try {
                                             </tr>
                                         <?php endforeach; ?>
 
+                                        <!-- Total Amount Row -->
                                         <tr class="total-row">
                                             <td colspan="4"><strong>Total Amount:</strong></td>
                                             <td><strong>Rs. <?php echo number_format($totalAmount, 2); ?></strong></td>
                                         </tr>
 
-                                        <?php if ($billing && $billing['discount_type'] !== 'none' && $billing['discount_value'] > 0): ?>
+                                        <!-- Discount Row -->
+                                        <?php if (!empty($billing) && !empty($billing['discount_value'])): ?>
+                                            <?php
+                                            // Calculate discount amount
+                                            $discountAmount = $billing['discount_type'] === 'percentage' 
+                                                ? ($totalAmount * $billing['discount_value'] / 100)
+                                                : $billing['discount_value'];
+                                            
+                                            // Calculate net total
+                                            $netTotal = $totalAmount - $discountAmount;
+                                            ?>
                                             <tr class="discount-row">
                                                 <td colspan="4">
-                                                    <strong>Discount (<?php 
-                                                        echo $billing['discount_type'] === 'percentage' 
-                                                            ? htmlspecialchars($billing['discount_value']) . '%' 
-                                                            : '₹' . htmlspecialchars($billing['discount_value']); 
-                                                    ?>):</strong>
+                                                    <strong>Discount <?php echo $billing['discount_type'] === 'percentage' 
+                                                        ? "({$billing['discount_value']}%)" 
+                                                        : "(Rs. " . number_format($billing['discount_value'], 2) . ")"; ?></strong>
                                                 </td>
-                                                <td>
-                                                    <strong>-Rs. <?php 
-                                                        $discountAmount = $billing['discount_type'] === 'percentage'
-                                                            ? ($totalAmount * $billing['discount_value'] / 100)
-                                                            : $billing['discount_value'];
-                                                        echo number_format($discountAmount, 2);
-                                                    ?></strong>
-                                                </td>
+                                                <td><strong>-Rs. <?php echo number_format($discountAmount, 2); ?></strong></td>
                                             </tr>
                                             <tr class="net-total-row">
                                                 <td colspan="4"><strong>Net Total:</strong></td>
-                                                <td><strong>Rs. <?php 
-                                                    $netTotal = $totalAmount - $discountAmount;
-                                                    echo number_format($netTotal, 2);
-                                                ?></strong></td>
+                                                <td><strong>Rs. <?php echo number_format($netTotal, 2); ?></strong></td>
                                             </tr>
                                         <?php endif; ?>
                                     </tbody>
@@ -767,13 +765,17 @@ try {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php foreach ($visits as $visit): ?>
+                                        <?php 
+                                        $totalPaid = 0;
+                                        foreach ($visits as $visit): 
+                                            $totalPaid += $visit['visit_amount'];
+                                        ?>
                                             <tr>
-                                                <td><?php echo htmlspecialchars($visit['visit_date']); ?></td>
+                                                <td><?php echo date('Y-m-d', strtotime($visit['visit_date'])); ?></td>
                                                 <td><?php echo htmlspecialchars($visit['treatment_done']); ?></td>
-                                                <td>Rs. <?php echo htmlspecialchars($visit['visit_amount']); ?></td>
+                                                <td>Rs. <?php echo number_format($visit['visit_amount'], 2); ?></td>
                                                 <td><?php echo htmlspecialchars($visit['visit_mode']); ?></td>
-                                                <td>Rs. <?php echo htmlspecialchars($visit['balance']); ?></td>
+                                                <td>Rs. <?php echo number_format($visit['balance'], 2); ?></td>
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>

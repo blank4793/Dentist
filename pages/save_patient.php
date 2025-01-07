@@ -17,6 +17,9 @@ function debug_log($message, $data = null) {
     error_log($log . "\n", 3, __DIR__ . "/../logs/save_patient.log");
 }
 
+// At the start of the file, after the headers
+error_log("POST data received: " . print_r($_POST, true));
+
 try {
     debug_log("Starting patient save process");
     
@@ -47,6 +50,15 @@ try {
         'treatments' => $treatments,
         'billing' => $billing
     ]);
+
+    // Decode and log the received data
+    $patientData = json_decode($_POST['patientData'], true);
+    $medicalHistory = json_decode($_POST['medicalHistory'], true);
+    $treatments = json_decode($_POST['treatments'], true);
+    
+    error_log("Decoded patient data: " . print_r($patientData, true));
+    error_log("Decoded medical history: " . print_r($medicalHistory, true));
+    error_log("Decoded treatments: " . print_r($treatments, true));
 
     // Start transaction
     $pdo->beginTransaction();
@@ -186,45 +198,44 @@ try {
         }
 
         // Insert billing information
-        $stmt = $pdo->prepare("
-            INSERT INTO billing (
-                patient_id, 
-                discount_type, 
-                discount_value
-            ) VALUES (
-                :patient_id,
-                :discount_type,
-                :discount_value
-            )
-        ");
+        if (!empty($_POST['discountType']) && !empty($_POST['discountValue'])) {
+            $stmt = $pdo->prepare("
+                INSERT INTO billing (
+                    patient_id, 
+                    discount_type, 
+                    discount_value
+                ) VALUES (?, ?, ?)
+            ");
+            $stmt->execute([
+                $patientId,
+                $_POST['discountType'],
+                $_POST['discountValue']
+            ]);
+        }
 
-        $stmt->execute([
-            'patient_id' => $patientId,
-            'discount_type' => $billing['discountType'],
-            'discount_value' => floatval($billing['discountValue'])
-        ]);
-
-        // 4. Insert visits
-        if (!empty($visits)) {
+        // Insert visits
+        if (!empty($_POST['visits'])) {
+            $visits = json_decode($_POST['visits'], true);
             $stmt = $pdo->prepare("
                 INSERT INTO visits (
-                    patient_id, visit_date, treatment_done,
-                    visit_amount, visit_mode, balance
-                ) VALUES (
-                    :patient_id, :visit_date, :treatment_done,
-                    :visit_amount, :visit_mode, :balance
-                )
+                    patient_id,
+                    visit_date,
+                    treatment_done,
+                    visit_amount,
+                    visit_mode,
+                    balance
+                ) VALUES (?, ?, ?, ?, ?, ?)
             ");
 
             foreach ($visits as $visit) {
                 if (!empty($visit['date'])) {
                     $stmt->execute([
-                        'patient_id' => $patientId,
-                        'visit_date' => $visit['date'],
-                        'treatment_done' => $visit['treatment'],
-                        'visit_amount' => $visit['amount'],
-                        'visit_mode' => $visit['mode'],
-                        'balance' => $visit['balance']
+                        $patientId,
+                        $visit['date'],
+                        $visit['treatment'],
+                        $visit['amount'],
+                        $visit['mode'],
+                        $visit['balance']
                     ]);
                 }
             }
@@ -257,4 +268,5 @@ try {
         'message' => $e->getMessage(),
         'details' => $e->getTraceAsString()
     ]);
+    exit();
 } 
