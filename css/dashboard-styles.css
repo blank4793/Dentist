@@ -900,3 +900,196 @@
         padding: 10px;
     }
 } 
+
+/* Signature Pad Styles */
+.signature-section {
+    margin: 20px 0;
+}
+
+.signature-pad-wrapper {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin: 10px 0;
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+}
+
+#signaturePad {
+    width: 100%;
+    height: 200px;
+    touch-action: none;
+    cursor: crosshair;
+    background-color: #fff;
+}
+
+.signature-buttons {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+#clearSignature {
+    padding: 5px 15px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#clearSignature:hover {
+    background-color: #5a6268;
+} 
+
+/* Signature Sections Styling */
+.signatures-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.signature-section {
+    flex: 1;
+    max-width: 500px;
+}
+
+.signature-pad-wrapper {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin: 10px 0;
+    position: relative;
+    width: 100%;
+}
+
+#patientSignaturePad,
+#doctorSignaturePad {
+    width: 100%;
+    height: 200px;
+    touch-action: none;
+    cursor: crosshair;
+    background-color: #fff;
+}
+
+.signature-buttons {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-secondary {
+    padding: 5px 15px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* Responsive design for signatures */
+@media (max-width: 992px) {
+    .signatures-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .signature-section {
+        max-width: 100%;
+    }
+} 
+
+/* Signature Display Styles */
+.signatures-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.signature-display {
+    flex: 1;
+    max-width: 500px;
+    padding: 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.signature-display h4 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.signature-image {
+    width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    background-color: #fff;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+
+.no-signature {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    font-style: italic;
+}
+
+/* Responsive design */
+@media (max-width: 992px) {
+    .signatures-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .signature-display {
+        max-width: 100%;
+    }
+} 
+
+.disclaimer-content {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
+
+.disclaimer-content p {
+    margin: 0;
+    line-height: 1.6;
+    color: #333;
+} 
+
+/* View-only signature styles for edit form */
+.signature-note {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    border-radius: 4px;
+    color: #856404;
+    text-align: center;
+}
+
+.signature-note p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* Make signatures appear as view-only */
+.signature-display img {
+    opacity: 0.9;
+    cursor: not-allowed;
+} 

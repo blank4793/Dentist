@@ -247,6 +247,8 @@ if (isset($patientId)) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/dashboard-styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
+    <script src="../js/signature-pad.js"></script>
     <style>
         /* Add these styles for the dental chart */
         .dental-chart-section {
@@ -690,7 +692,7 @@ if (isset($patientId)) {
                                 <tfoot>
                                     <tr class="total-row">
                                         <td colspan="3">TOTAL AMOUNT</td>
-                                        <td><span id="totalAmount">₹0.00</span></td>
+                                        <td><span id="totalAmount">Rs.0.00</span></td>
                                     </tr>
                                     <tr class="discount-row">
                                         <td colspan="3">
@@ -711,7 +713,7 @@ if (isset($patientId)) {
                                     </tr>
                                     <tr class="net-total-row">
                                         <td colspan="3">NET TOTAL</td>
-                                        <td><span id="netTotal">₹0.00</span></td>
+                                        <td><span id="netTotal">Rs.0.00</span></td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -757,17 +759,37 @@ if (isset($patientId)) {
 
                     <input type="hidden" id="treatmentsInput" name="treatments" value="">
 
-                    <div class="disclaimer-section">
+                    <!-- Disclaimer Section -->
+                    <div class="form-section">
                         <h3>PLEASE READ THIS CAREFULLY</h3>
-                        <p class="disclaimer-text" style="font-style: italic;">
-                            I Affirm that the above information is best to my knowledge. I have not concealed any information regarding 
-                            my medical history, I am fully aware that correct history is very important for the outcome of my treatment. 
-                            I also affirm that I have discussed and understood the treatment and cost details. There is no guarantee for 
-                            any treatment however responsibility of treatment may be for taken by the clinic.
-                        </p>
-                        <div class="signature-section">
-                            <p><strong>PATIENT SIGNATURE</strong></p>
-                            <div class="signature-line">____________________________</div>
+                        <div class="disclaimer-content">
+                            <p style="font-style: italic;">I Affirm that the above information is best to my knowledge. I have not concealed any information regarding my medical history. I am fully aware that correct history is very important for the outcome of my treatment. I also affirm that I have discussed and understood the treatment and cost details. There is no guarantee for any treatment however responsibility of treatment may be for taken by the clinic.</p>
+                            
+                            <div class="signatures-container">
+                                <!-- Patient Signature -->
+                                <div class="signature-section">
+                                    <label><strong>PATIENT SIGNATURE</strong></label>
+                                    <div class="signature-pad-wrapper">
+                                        <canvas id="patientSignaturePad"></canvas>
+                                        <input type="hidden" name="patient_signature_data" id="patientSignatureData">
+                                    </div>
+                                    <div class="signature-buttons">
+                                        <button type="button" class="btn btn-secondary" id="clearPatientSignature">Clear Signature</button>
+                                    </div>
+                                </div>
+
+                                <!-- Doctor Signature -->
+                                <div class="signature-section">
+                                    <label><strong>DOCTOR SIGNATURE</strong></label>
+                                    <div class="signature-pad-wrapper">
+                                        <canvas id="doctorSignaturePad"></canvas>
+                                        <input type="hidden" name="doctor_signature_data" id="doctorSignatureData">
+                                    </div>
+                                    <div class="signature-buttons">
+                                        <button type="button" class="btn btn-secondary" id="clearDoctorSignature">Clear Signature</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -789,5 +811,7 @@ if (isset($patientId)) {
     <script src="../js/shared.js"></script>
     <script src="../js/form-submission.js"></script>
     <script src="../js/dental-chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
+    <script src="../js/signature-pad.js"></script>
 </body>
 </html> 

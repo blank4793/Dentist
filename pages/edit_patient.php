@@ -438,17 +438,49 @@ try {
                             <button type="button" id="addVisitRow" class="add-visit-btn">Add Visit</button>
                         </div>
 
-                        <div class="disclaimer-section">
-                            <h3>PLEASE READ THIS CAREFULLY</h3>
-                            <p class="disclaimer-text" style="font-style: italic;">
-                                I Affirm that the above information is best to my knowledge. I have not concealed any information regarding 
-                                my medical history, I am fully aware that correct history is very important for the outcome of my treatment. 
-                                I also affirm that I have discussed and understood the treatment and cost details. There is no guarantee for 
-                                any treatment however responsibility of treatment may be for taken by the clinic.
-                            </p>
-                            <div class="signature-section">
-                                <p><strong>PATIENT SIGNATURE</strong></p>
-                                <div class="signature-line">____________________________</div>
+                        <div class="section">
+                            <h3>DISCLAIMER</h3>
+                            <div class="disclaimer-content">
+                                <p style="font-style: italic;">
+                                    I Affirm that the above information is best to my knowledge. I have not concealed any information regarding 
+                                    my medical history, I am fully aware that correct history is very important for the outcome of my treatment. 
+                                    I also affirm that I have discussed and understood the treatment and cost details. There is no guarantee for 
+                                    any treatment however responsibility of treatment may be for taken by the clinic.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h3>SIGNATURES (View Only)</h3>
+                            <div class="signatures-container">
+                                <!-- Patient Signature -->
+                                <div class="signature-display">
+                                    <h4>Patient Signature</h4>
+                                    <?php if (!empty($patient['signature'])): ?>
+                                        <img src="data:image/png;base64,<?php echo $patient['signature']; ?>" 
+                                             alt="Patient Signature" 
+                                             class="signature-image"
+                                             style="pointer-events: none;">
+                                    <?php else: ?>
+                                        <p class="no-signature">No patient signature available</p>
+                                    <?php endif; ?>
+                                </div>
+
+                                <!-- Doctor Signature -->
+                                <div class="signature-display">
+                                    <h4>Doctor Signature</h4>
+                                    <?php if (!empty($patient['doctor_signature'])): ?>
+                                        <img src="data:image/png;base64,<?php echo $patient['doctor_signature']; ?>" 
+                                             alt="Doctor Signature" 
+                                             class="signature-image"
+                                             style="pointer-events: none;">
+                                    <?php else: ?>
+                                        <p class="no-signature">No doctor signature available</p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <div class="signature-note">
+                                <p><em>Note: Signatures cannot be edited. To update signatures, please create a new form.</em></p>
                             </div>
                         </div>
 

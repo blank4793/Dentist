@@ -19,7 +19,8 @@ $patientId = $_GET['id'];
 try {
     // Get patient basic information
     $stmt = $pdo->prepare("
-        SELECT * FROM patients 
+        SELECT * 
+        FROM patients 
         WHERE id = ?
     ");
     $stmt->execute([$patientId]);
@@ -782,24 +783,50 @@ try {
                             <?php endif; ?>
                         </div>
 
-                        <!-- Add after the visits section -->
+                        <!-- Add this before the signatures section -->
                         <div class="section">
-                            <div class="disclaimer-section">
-                                <h3>PLEASE READ THIS CAREFULLY</h3>
-                                <p class="disclaimer-text" style="font-style: italic;">
+                            <h3>DISCLAIMER</h3>
+                            <div class="disclaimer-content">
+                                <p style="font-style: italic;">
                                     I Affirm that the above information is best to my knowledge. I have not concealed any information regarding 
                                     my medical history, I am fully aware that correct history is very important for the outcome of my treatment. 
                                     I also affirm that I have discussed and understood the treatment and cost details. There is no guarantee for 
                                     any treatment however responsibility of treatment may be for taken by the clinic.
                                 </p>
-                                <div class="signature-section">
-                                    <p><strong>PATIENT SIGNATURE</strong></p>
-                                    <div class="signature-line">____________________________</div>
+                            </div>
+                        </div>
+
+                        <!-- Then the signatures section -->
+                        <div class="section">
+                            <h3>SIGNATURES</h3>
+                            <div class="signatures-container">
+                                <!-- Patient Signature -->
+                                <div class="signature-display">
+                                    <h4>Patient Signature</h4>
+                                    <?php if (!empty($patient['signature'])): ?>
+                                        <img src="data:image/png;base64,<?php echo $patient['signature']; ?>" 
+                                             alt="Patient Signature" 
+                                             class="signature-image">
+                                    <?php else: ?>
+                                        <p class="no-signature">No patient signature available</p>
+                                    <?php endif; ?>
+                                </div>
+
+                                <!-- Doctor Signature -->
+                                <div class="signature-display">
+                                    <h4>Doctor Signature</h4>
+                                    <?php if (!empty($patient['doctor_signature'])): ?>
+                                        <img src="data:image/png;base64,<?php echo $patient['doctor_signature']; ?>" 
+                                             alt="Doctor Signature" 
+                                             class="signature-image">
+                                    <?php else: ?>
+                                        <p class="no-signature">No doctor signature available</p>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Action Buttons -->
+                        <!-- Finally the action buttons -->
                         <div class="action-buttons">
                             <button class="action-button edit-button" onclick="location.href='edit_patient.php?id=<?php echo $patientId; ?>'">
                                 Edit Patient

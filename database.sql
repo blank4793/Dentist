@@ -34,6 +34,8 @@ CREATE TABLE patients (
     diagnosis TEXT NULL,
     treatment_advised TEXT NULL,
     selected_teeth TEXT NULL,
+    signature MEDIUMTEXT,
+    doctor_signature MEDIUMTEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

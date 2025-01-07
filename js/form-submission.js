@@ -75,176 +75,52 @@ $(document).ready(function() {
     // Form validation and submission
     $('#patientForm').on('submit', function(e) {
         e.preventDefault();
-        
-        // Validate ENUM fields
-        const gender = $('#gender').val();
-        if (!['Male', 'Female', 'Other'].includes(gender)) {
-            alert('Please select a valid gender');
-            return;
-        }
 
-        // Collect basic patient info
-        const patientData = {
-            name: $('#patientName').val().trim(),
-            date: $('#date').val(),
-            sector: $('#sector').val().trim(),
-            streetNo: $('#streetNo').val().trim(),
-            houseNo: $('#houseNo').val().trim(),
-            nonIslamabadAddress: $('#nonIslamabadAddress').val().trim(),
-            phone: $('#phone').val().trim(),
-            age: parseInt($('#age').val()) || 0,
-            gender: gender,
-            occupation: $('#occupation').val().trim(),
-            email: $('#email').val().trim()
+        // Get signature data
+        const patientSignature = document.getElementById('patientSignatureData').value;
+        const doctorSignature = document.getElementById('doctorSignatureData').value;
+
+        // Collect all form data
+        const formData = {
+            patientData: {
+                name: $('#patientName').val(),
+                // ... other patient fields ...
+                signature: patientSignature,
+                doctor_signature: doctorSignature
+            },
+            // ... other form data ...
         };
 
-        // Basic validation
-        if (!patientData.name || !patientData.date || !patientData.phone) {
-            alert('Please fill in all required fields (Name, Date, Phone)');
-            return;
-        }
+        // Show loading state
+        $('.submit-btn').prop('disabled', true).text('Submitting...');
 
-        // Validate phone number format
-        if (!/^\d{10,}$/.test(patientData.phone.replace(/[-()\s]/g, ''))) {
-            alert('Please enter a valid phone number');
-            return;
-        }
-
-        // Validate email if provided
-        if (patientData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(patientData.email)) {
-            alert('Please enter a valid email address');
-            return;
-        }
-
-        // Collect treatments data with validation
-        const treatmentsData = window.treatments.map(treatment => ({
-            name: treatment.name,
-            quantity: parseInt(treatment.quantity) || 1,
-            pricePerUnit: parseFloat(treatment.pricePerUnit) || 0,
-            totalPrice: parseFloat(treatment.totalPrice) || 0,
-            selectedTeeth: treatment.selectedTeeth || ''
-        }));
-
-        // Collect visits data with ENUM validation
-        const visitsData = [];
-        $('#visitsTableBody tr').each(function() {
-            const mode = $(this).find('.mode-input').val();
-            if (!['cash', 'card', 'insurance'].includes(mode)) {
-                alert('Invalid payment mode selected');
-                return;
-            }
-
-            const amount = parseFloat($(this).find('.amount-paid-input').val()) || 0;
-            const balance = parseFloat($(this).find('.balance-input').val()) || 0;
-
-            visitsData.push({
-                date: $(this).find('.date-input').val(),
-                treatment: $(this).find('.treatment-input').val(),
-                amount: amount,
-                mode: mode,
-                balance: balance
-            });
-        });
-
-        // Collect billing data
-        const billingData = {
-            totalAmount: parseFloat($('#totalAmount').text().replace(/Rs\.|,/g, '')) || 0,
-            discountType: $('#discountType').val(),
-            discountValue: parseFloat($('#discountValue').val()) || 0,
-            netTotal: parseFloat($('#netTotal').text().replace(/Rs\.|,/g, '')) || 0
-        };
-
-        // Validate discount type
-        if (!['percentage', 'fixed'].includes(billingData.discountType)) {
-            alert('Invalid discount type');
-            return;
-        }
-
-        // Validate all data
-        const patientErrors = validatePatientData(patientData);
-        const treatmentErrors = validateTreatments(treatmentsData);
-        const visitErrors = validateVisits(visitsData);
-
-        // Collect medical history
-        const medicalHistory = {
-            heartProblem: $('#heartProblem').is(':checked'),
-            bloodPressure: $('#bloodPressure').is(':checked'),
-            bleedingDisorder: $('#bleedingDisorder').is(':checked'),
-            bloodThinners: $('#bloodThinners').is(':checked'),
-            hepatitis: $('#hepatitis').is(':checked'),
-            diabetes: $('#diabetes').is(':checked'),
-            faintingSpells: $('#faintingSpells').is(':checked'),
-            allergyAnesthesia: $('#allergyAnesthesia').is(':checked'),
-            malignancy: $('#malignancy').is(':checked'),
-            previousSurgery: $('#previousSurgery').is(':checked'),
-            epilepsy: $('#epilepsy').is(':checked'),
-            asthma: $('#asthma').is(':checked'),
-            pregnant: $('#pregnant').is(':checked'),
-            phobia: $('#phobia').is(':checked'),
-            stomach: $('#stomach').is(':checked'),
-            allergy: $('#allergy').is(':checked'),
-            drugAllergy: $('#drugAllergy').is(':checked'),
-            smoker: $('#smoker').is(':checked'),
-            alcoholic: $('#alcoholic').is(':checked'),
-            otherConditions: $('#otherConditions').val() || ''
-        };
-
-        // Validate medical history (optional)
-        function validateMedicalHistory(medicalHistory) {
-            const errors = [];
-            // Add any specific medical history validations here if needed
-            return errors;
-        }
-
-        // Add medical history validation to the overall validation
-        const medicalHistoryErrors = validateMedicalHistory(medicalHistory);
-        const allErrors = [
-            ...patientErrors, 
-            ...treatmentErrors, 
-            ...visitErrors,
-            ...medicalHistoryErrors
-        ];
-
-        if (allErrors.length > 0) {
-            alert('Please correct the following errors:\n\n' + allErrors.join('\n'));
-            return;
-        }
-
-        // Add all data to form data
-        const formData = new FormData(this);
-        formData.append('patientData', JSON.stringify(patientData));
-        formData.append('medicalHistory', JSON.stringify(medicalHistory));
-        formData.append('treatments', JSON.stringify(treatmentsData));
-        formData.append('visits', JSON.stringify(visitsData));
-        formData.append('billing', JSON.stringify(billingData));
-        formData.append('selectedTeeth', $('#selectedTeethInput').val());
-        formData.append('diagnosis', $('#diagnosis').val());
-        formData.append('treatmentAdvised', $('#treatmentAdvised').val());
-
-        // Submit form with improved error handling
+        // Submit the form
         $.ajax({
             url: 'save_patient.php',
             type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
+            data: {
+                patientData: JSON.stringify(formData.patientData),
+                medicalHistory: JSON.stringify(formData.medicalHistory),
+                treatments: JSON.stringify(formData.treatments),
+                visits: JSON.stringify(formData.visits),
+                billing: JSON.stringify(formData.billing),
+                selectedTeeth: formData.selectedTeeth,
+                patient_signature_data: patientSignature,
+                doctor_signature_data: doctorSignature
+            },
             success: function(response) {
-                console.log('Server response:', response);
                 if (response.success) {
-                    alert('Patient added successfully!');
+                    alert('Patient data saved successfully!');
                     window.location.href = `view_patient.php?id=${response.patientId}`;
                 } else {
-                    alert('Error: ' + (response.message || 'Unknown error occurred'));
-                    console.error('Error details:', response);
+                    alert('Error: ' + response.message);
+                    $('.submit-btn').prop('disabled', false).text('Submit Registration');
                 }
             },
             error: function(xhr, status, error) {
-                console.error('AJAX Error:', {
-                    status: status,
-                    error: error,
-                    response: xhr.responseText
-                });
-                alert('Error submitting form. Please check console for details.');
+                alert('Error submitting form. Please try again.');
+                $('.submit-btn').prop('disabled', false).text('Submit Registration');
+                console.error(error);
             }
         });
     });

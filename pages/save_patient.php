@@ -58,14 +58,25 @@ try {
                 name, date, sector, street_no, house_no, 
                 non_islamabad_address, phone, age, gender, 
                 occupation, email, diagnosis, treatment_advised, 
-                selected_teeth
+                selected_teeth, signature, doctor_signature
             ) VALUES (
                 :name, :date, :sector, :street_no, :house_no,
                 :non_islamabad_address, :phone, :age, :gender,
                 :occupation, :email, :diagnosis, :treatment_advised,
-                :selected_teeth
+                :selected_teeth, :signature, :doctor_signature
             )
         ");
+
+        // Get signature data
+        $patientSignature = $_POST['patient_signature_data'] ?? null;
+        $doctorSignature = $_POST['doctor_signature_data'] ?? null;
+
+        if ($patientSignature) {
+            $patientSignature = str_replace('data:image/png;base64,', '', $patientSignature);
+        }
+        if ($doctorSignature) {
+            $doctorSignature = str_replace('data:image/png;base64,', '', $doctorSignature);
+        }
 
         $stmt->execute([
             'name' => $patientData['name'],
@@ -81,7 +92,9 @@ try {
             'email' => $patientData['email'],
             'diagnosis' => $_POST['diagnosis'] ?? null,
             'treatment_advised' => $_POST['treatmentAdvised'] ?? null,
-            'selected_teeth' => $selectedTeeth
+            'selected_teeth' => $selectedTeeth,
+            'signature' => $patientSignature,
+            'doctor_signature' => $doctorSignature
         ]);
 
         $patientId = $pdo->lastInsertId();
@@ -225,6 +238,7 @@ try {
             'patientId' => $patientId,
             'message' => 'Patient added successfully'
         ]);
+        exit();
 
     } catch (Exception $e) {
         $pdo->rollBack();
