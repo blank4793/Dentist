@@ -610,13 +610,13 @@ if (isset($patientId)) {
                     <!-- Dental Chart Section -->
                     <div class="dental-chart-section">
                         <h3>DENTAL CHART</h3>
-                        <div class="chart-container">
+                        <div class="dental-chart">
                             <?php include '../templates/dental-chart.html'; ?>
-                            <div class="selected-teeth-info">
-                                <h4>Selected Teeth</h4>
-                                <div id="selectedTeethList"></div>
-                                <input type="hidden" id="selectedTeethInput" name="selected_teeth" value="">
-                            </div>
+                        </div>
+                        <div class="selected-teeth-info">
+                            <h4>Selected Teeth</h4>
+                            <div id="selectedTeethList"></div>
+                            <input type="hidden" id="selectedTeethInput" name="selected_teeth" value="">
                         </div>
                     </div>
 

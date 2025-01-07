@@ -796,28 +796,33 @@
 
 /* Dental Chart Section */
 .dental-chart-section {
-    background: white;
-    padding: 30px;
+    margin: 20px 0;
+    padding: 20px;
+    background: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 30px;
+    height: auto;
+    max-height: none;
+    min-height: 800px;
+    overflow: visible;
 }
 
-.chart-container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-/* SVG Tooth Chart Styles */
-.tooth-chart {
+.dental-chart {
     width: 100%;
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
+    height: auto;
 }
 
+.dental-chart svg {
+    width: 100%;
+    height: auto;
+    min-height: 400px;
+    display: block;
+}
+
+/* SVG Tooth Chart Styles */
 #Spots polygon,
 #Spots path {
     fill: #FFFFFF;
@@ -839,23 +844,15 @@
     stroke: #1976D2;
 }
 
-#toothLabels text {
-    font-size: 12px;
-    fill: #666;
-}
-
-#dmftLabels text {
-    font-size: 10px;
-    fill: #999;
-}
-
-/* Selected teeth list */
+/* Selected teeth info below the chart */
 .selected-teeth-info {
-    margin-top: 30px;
-    padding: 20px;
-    border: 1px solid #e0e0e0;
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
     border-radius: 8px;
-    background: #fafafa;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 20px;
 }
 
 .selected-teeth-info h3 {
@@ -868,6 +865,11 @@
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
+    min-height: 50px;
+    padding: 10px;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+    background: #fff;
 }
 
 .selected-tooth-item {
